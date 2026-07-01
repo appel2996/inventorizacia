@@ -83,7 +83,9 @@
     <div id="qr-output">Выберите стол</div>
 </div>
 
+<!-- Подключаем библиотеку QRCode -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
 // ============================================================
 // ДАННЫЕ
@@ -322,12 +324,13 @@ function renderZones() {
         label.textContent = '№' + zone.table;
         div.appendChild(label);
         
-        (function(tableNum) {
-            div.addEventListener('click', function(e) {
+        // Используем замыкание без eval
+        div.addEventListener('click', function(tableNum) {
+            return function(e) {
                 e.stopPropagation();
                 selectTable(tableNum);
-            });
-        })(zone.table);
+            };
+        }(zone.table));
         
         container.appendChild(div);
     }
@@ -360,8 +363,12 @@ function selectTable(tableNum) {
         try {
             if (typeof QRCode !== 'undefined') {
                 new QRCode(qrContainer, { text: qrData, width: 150, height: 150 });
+            } else {
+                qrContainer.innerHTML = '⚠️ QR-библиотека не загружена';
             }
-        } catch(e) {}
+        } catch(e) {
+            qrContainer.innerHTML = '⚠️ Ошибка QR: ' + e.message;
+        }
     } else {
         qrContainer.innerHTML = '<p style="color:#999;">Стол №' + tableNum + ' — пуст</p>';
     }
@@ -448,9 +455,9 @@ function renderTableGrid() {
         var badge = document.createElement('div');
         badge.className = 'table-badge';
         badge.textContent = t;
-        (function(tableNum) {
-            badge.addEventListener('click', function() { selectTable(tableNum); });
-        })(t);
+        badge.addEventListener('click', function(tableNum) {
+            return function() { selectTable(tableNum); };
+        }(t));
         grid.appendChild(badge);
     }
 }
@@ -483,13 +490,4 @@ function clearAll() {
     document.getElementById('drop-zone').style.display = 'block';
     renderPlanList();
     renderTableGrid();
-    updateStats();
-}
-
-// ============================================================
-// ЗАПУСК
-// ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Страница загружена!');
-    
- (...)
+    upd (...)
