@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Инвентаризация</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { display: flex; gap: 20px; padding: 20px; background: #f0f2f5; flex-wrap: wrap; margin: 0; }
+        body { display: flex; gap: 20px; padding: 20px; background: #f0f2f5; flex-wrap: wrap; }
         .panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
         #map { flex: 2; min-width: 500px; }
         #map-container { position: relative; width: 100%; }
@@ -43,18 +43,18 @@
         .drop-zone .icon { font-size: 48px; display: block; margin-bottom: 10px; }
         #file-input { display: none; }
         @media (max-width: 768px) { body { flex-direction: column; } #map { min-width: auto; } }
+        .loading { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<!-- КАРТА -->
 <div id="map" class="panel">
     <h2>🗺️ План помещения</h2>
     <div class="plan-list" id="plan-list"></div>
     
     <div class="drop-zone" id="drop-zone">
         <span class="icon">🖼️</span>
-        <p><b>Нажмите «Выбрать файл» или перетащите картинку</b></p>
+        <p><b>Нажмите для выбора картинки плана</b></p>
         <button class="btn btn-warning" id="selectFileBtn">📂 Выбрать файл</button>
         <input type="file" id="file-input" accept="image/*">
     </div>
@@ -71,7 +71,6 @@
     </div>
 </div>
 
-<!-- ИНФОРМАЦИЯ -->
 <div class="panel" id="info">
     <h2>📋 Данные</h2>
     <div class="stats" id="stats"></div>
@@ -84,9 +83,10 @@
     <div id="qr-output">Выберите стол</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ============================================================
-// 1. ДАННЫЕ
+// ДАННЫЕ
 // ============================================================
 var inventory = [];
 var plans = [];
@@ -118,7 +118,7 @@ function getCurrentPlan() {
 }
 
 // ============================================================
-// 2. ТЕСТОВЫЕ ДАННЫЕ
+// ТЕСТОВЫЕ ДАННЫЕ
 // ============================================================
 function generateTestData() {
     var types = ['Монитор', 'Системный блок', 'Ноутбук', 'Принтер'];
@@ -155,7 +155,7 @@ function saveInventory() {
 }
 
 // ============================================================
-// 3. ЗАГРУЗКА КАРТИНКИ (ПРОСТАЯ И НАДЁЖНАЯ)
+// ЗАГРУЗКА КАРТИНКИ
 // ============================================================
 function loadImageFile(file) {
     if (!file) return;
@@ -169,13 +169,13 @@ function loadImageFile(file) {
         img.src = imageDataUrl;
         img.onload = function() { renderZones(); };
         document.getElementById('drop-zone').style.display = 'none';
-        alert('✅ Картинка загружена для плана "' + plan.name + '"');
+        alert('✅ Картинка загружена!');
     };
     reader.readAsDataURL(file);
 }
 
 // ============================================================
-// 4. ОТРИСОВКА
+// ОТРИСОВКА
 // ============================================================
 function renderPlanList() {
     var container = document.getElementById('plan-list');
@@ -244,7 +244,7 @@ function deletePlan(index) {
 }
 
 // ============================================================
-// 5. ЗОНЫ
+// ЗОНЫ
 // ============================================================
 function autoGenerateZones() {
     var img = document.getElementById('floor-plan');
@@ -318,7 +318,7 @@ function renderZones() {
 }
 
 // ============================================================
-// 6. ВЫБОР СТОЛА
+// ВЫБОР СТОЛА
 // ============================================================
 function selectTable(tableNum) {
     selectedTable = tableNum;
@@ -368,7 +368,7 @@ function renderDeviceList(items, tableNum) {
 }
 
 // ============================================================
-// 7. ПОИСК
+// ПОИСК
 // ============================================================
 function searchDevice() {
     var query = document.getElementById('search-input').value.toLowerCase().trim();
@@ -415,7 +415,7 @@ function searchDevice() {
 }
 
 // ============================================================
-// 8. СЕТКА СТОЛОВ
+// СЕТКА СТОЛОВ
 // ============================================================
 function renderTableGrid() {
     var grid = document.getElementById('table-grid');
@@ -440,7 +440,7 @@ function renderTableGrid() {
 }
 
 // ============================================================
-// 9. СТАТИСТИКА И СБРОС
+// СТАТИСТИКА И СБРОС
 // ============================================================
 function updateStats() {
     var uniqueTables = [];
@@ -471,12 +471,11 @@ function clearAll() {
 }
 
 // ============================================================
-// 10. НАСТРОЙКА ВСЕХ СОБЫТИЙ (ГЛАВНОЕ!)
+// НАСТРОЙКА СОБЫТИЙ
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Страница загружена! Начинаем настройку...');
+    console.log('Страница загружена!');
     
-    // === КНОПКИ ===
     document.getElementById('addPlanBtn').onclick = addPlan;
     document.getElementById('generateBtn').onclick = autoGenerateZones;
     document.getElementById('clearBtn').onclick = clearAll;
@@ -486,5 +485,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') searchDevice();
     };
     
-    // === ЗАГРУЗКА КАРТИНКИ ===
-    var fileInput = document.getElementById('fil (...)
+    var fileInput = document.getElementById('file-input');
+    fileInput.onchange = function(e) {
+        var file = e.tar (...)
