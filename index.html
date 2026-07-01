@@ -6,7 +6,7 @@
     <title>Инвентаризация</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { display: flex; gap: 20px; padding: 20px; background: #f0f2f5; flex-wrap: wrap; }
+        body { display: flex; gap: 20px; padding: 20px; background: #f0f2f5; flex-wrap: wrap; margin: 0; }
         .panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
         #map { flex: 2; min-width: 500px; }
         #map-container { position: relative; width: 100%; }
@@ -39,20 +39,21 @@
         .plan-item { background: #e9ecef; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; border: 2px solid transparent; }
         .plan-item.active { border-color: #007bff; background: #cfe2ff; }
         .plan-item .del { color: red; margin-left: 6px; cursor: pointer; }
-        .drop-zone { border: 3px dashed #007bff; border-radius: 12px; padding: 30px 20px; text-align: center; background: #f8f9fa; margin: 10px 0; }
+        .drop-zone { border: 3px dashed #007bff; border-radius: 12px; padding: 30px 20px; text-align: center; background: #f8f9fa; margin: 10px 0; cursor: pointer; }
+        .drop-zone:hover { background: #e9ecef; }
         .drop-zone .icon { font-size: 48px; display: block; margin-bottom: 10px; }
         #file-input { display: none; }
         @media (max-width: 768px) { body { flex-direction: column; } #map { min-width: auto; } }
-        .loading { opacity: 0.5; pointer-events: none; }
+        .log { font-size: 12px; color: #666; margin: 5px 0; }
     </style>
 </head>
 <body>
 
 <div id="map" class="panel">
     <h2>🗺️ План помещения</h2>
-    <div class="plan-list" id="plan-list"></div>
+    <div id="plan-list" class="plan-list"></div>
     
-    <div class="drop-zone" id="drop-zone">
+    <div id="drop-zone" class="drop-zone">
         <span class="icon">🖼️</span>
         <p><b>Нажмите для выбора картинки плана</b></p>
         <button class="btn btn-warning" id="selectFileBtn">📂 Выбрать файл</button>
@@ -73,10 +74,10 @@
 
 <div class="panel" id="info">
     <h2>📋 Данные</h2>
-    <div class="stats" id="stats"></div>
+    <div id="stats" class="stats"></div>
     <input type="text" id="search-input" placeholder="Поиск по ID, столу или ФИО...">
     <button class="btn" id="searchBtn" style="width:100%;">🔍 Найти</button>
-    <div class="table-grid" id="table-grid"></div>
+    <div id="table-grid" class="table-grid"></div>
     <div id="device-list"><p style="color:#999;">Выберите стол на карте</p></div>
     <hr>
     <h4>🏷️ QR-код</h4>
@@ -86,7 +87,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ============================================================
-// ДАННЫЕ
+// 1. ДАННЫЕ
 // ============================================================
 var inventory = [];
 var plans = [];
@@ -118,7 +119,7 @@ function getCurrentPlan() {
 }
 
 // ============================================================
-// ТЕСТОВЫЕ ДАННЫЕ
+// 2. ТЕСТОВЫЕ ДАННЫЕ
 // ============================================================
 function generateTestData() {
     var types = ['Монитор', 'Системный блок', 'Ноутбук', 'Принтер'];
@@ -155,7 +156,7 @@ function saveInventory() {
 }
 
 // ============================================================
-// ЗАГРУЗКА КАРТИНКИ
+// 3. ЗАГРУЗКА КАРТИНКИ
 // ============================================================
 function loadImageFile(file) {
     if (!file) return;
@@ -175,7 +176,7 @@ function loadImageFile(file) {
 }
 
 // ============================================================
-// ОТРИСОВКА
+// 4. ОТРИСОВКА
 // ============================================================
 function renderPlanList() {
     var container = document.getElementById('plan-list');
@@ -185,15 +186,32 @@ function renderPlanList() {
         var plan = plans[i];
         var isActive = (i === currentPlanIndex);
         var hasImage = plan.image && plan.image.length > 0;
-        html += '<span class="plan-item' + (isActive ? ' active' : '') + '" onclick="switchPlan(' + i + ')">';
+        html += '<span class="plan-item' + (isActive ? ' active' : '') + '" data-index="' + i + '">';
         html += (plan.name || 'План ' + (i+1));
         if (hasImage) html += ' 🖼️';
         if (plans.length > 1) {
-            html += '<span class="del" onclick="event.stopPropagation();deletePlan(' + i + ')">×</span>';
+            html += '<span class="del" data-index="' + i + '">×</span>';
         }
         html += '</span>';
     }
     container.innerHTML = html;
+    
+    // Привязываем события через addEventListener
+    container.querySelectorAll('.plan-item').forEach(function(el) {
+        var index = parseInt(el.dataset.index);
+        el.addEventListener('click', function(e) {
+            if (e.target.classList.contains('del')) return;
+            switchPlan(index);
+        });
+    });
+    
+    container.querySelectorAll('.del').forEach(function(el) {
+        var index = parseInt(el.dataset.index);
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deletePlan(index);
+        });
+    });
     
     var plan = getCurrentPlan();
     if (plan.image && plan.image.length > 0) {
@@ -244,12 +262,12 @@ function deletePlan(index) {
 }
 
 // ============================================================
-// ЗОНЫ
+// 5. ЗОНЫ
 // ============================================================
 function autoGenerateZones() {
     var img = document.getElementById('floor-plan');
     if (!img || !img.naturalWidth || img.naturalWidth < 10) {
-        alert('Сначала загрузите картинку плана! Нажмите «Выбрать файл» выше.');
+        alert('Сначала загрузите картинку плана! Нажмите на синюю зону и выберите файл.');
         return;
     }
     var plan = getCurrentPlan();
@@ -307,18 +325,20 @@ function renderZones() {
         label.className = 'zone-label';
         label.textContent = '№' + zone.table;
         div.appendChild(label);
-        div.onclick = (function(tableNum) {
-            return function(e) {
+        
+        (function(tableNum) {
+            div.addEventListener('click', function(e) {
                 e.stopPropagation();
                 selectTable(tableNum);
-            };
+            });
         })(zone.table);
+        
         container.appendChild(div);
     }
 }
 
 // ============================================================
-// ВЫБОР СТОЛА
+// 6. ВЫБОР СТОЛА
 // ============================================================
 function selectTable(tableNum) {
     selectedTable = tableNum;
@@ -344,8 +364,12 @@ function selectTable(tableNum) {
         try {
             if (typeof QRCode !== 'undefined') {
                 new QRCode(qrContainer, { text: qrData, width: 150, height: 150 });
+            } else {
+                qrContainer.innerHTML = '<p>⚠️ QR-библиотека не загружена</p>';
             }
-        } catch(e) {}
+        } catch(e) {
+            qrContainer.innerHTML = '<p>⚠️ Ошибка QR</p>';
+        }
     } else {
         qrContainer.innerHTML = '<p style="color:#999;">Стол №' + tableNum + ' — пуст</p>';
     }
@@ -368,7 +392,7 @@ function renderDeviceList(items, tableNum) {
 }
 
 // ============================================================
-// ПОИСК
+// 7. ПОИСК
 // ============================================================
 function searchDevice() {
     var query = document.getElementById('search-input').value.toLowerCase().trim();
@@ -415,7 +439,7 @@ function searchDevice() {
 }
 
 // ============================================================
-// СЕТКА СТОЛОВ
+// 8. СЕТКА СТОЛОВ
 // ============================================================
 function renderTableGrid() {
     var grid = document.getElementById('table-grid');
@@ -432,15 +456,15 @@ function renderTableGrid() {
         var badge = document.createElement('div');
         badge.className = 'table-badge';
         badge.textContent = t;
-        badge.onclick = (function(tableNum) {
-            return function() { selectTable(tableNum); };
+        (function(tableNum) {
+            badge.addEventListener('click', function() { selectTable(tableNum); });
         })(t);
         grid.appendChild(badge);
     }
 }
 
 // ============================================================
-// СТАТИСТИКА И СБРОС
+// 9. СТАТИСТИКА И СБРОС
 // ============================================================
 function updateStats() {
     var uniqueTables = [];
@@ -464,27 +488,4 @@ function clearAll() {
     document.getElementById('zones-container').innerHTML = '';
     document.getElementById('device-list').innerHTML = '<p style="color:#999;">Выберите стол</p>';
     document.getElementById('qr-output').innerHTML = 'Выберите стол';
-    document.getElementById('drop-zone').style.display = 'block';
-    renderPlanList();
-    renderTableGrid();
-    updateStats();
-}
-
-// ============================================================
-// НАСТРОЙКА СОБЫТИЙ
-// ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Страница загружена!');
-    
-    document.getElementById('addPlanBtn').onclick = addPlan;
-    document.getElementById('generateBtn').onclick = autoGenerateZones;
-    document.getElementById('clearBtn').onclick = clearAll;
-    document.getElementById('searchBtn').onclick = searchDevice;
-    
-    document.getElementById('search-input').onkeyup = function(e) {
-        if (e.key === 'Enter') searchDevice();
-    };
-    
-    var fileInput = document.getElementById('file-input');
-    fileInput.onchange = function(e) {
-        var file = e.tar (...)
+    document.getElementById('d (...)
