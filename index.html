@@ -1,491 +1,58 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Инвентаризация</title>
     <style>
-        * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { display: flex; gap: 20px; padding: 20px; background: #f0f2f5; flex-wrap: wrap; margin: 0; }
-        .panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
-        #map { flex: 2; min-width: 500px; }
-        #map-container { position: relative; width: 100%; }
-        #floor-plan { width: 100%; height: auto; display: block; border-radius: 8px; }
-        #zones-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .zone { position: absolute; border: 2px solid #007bff; background: rgba(0,123,255,0.15); cursor: pointer; }
-        .zone:hover { background: rgba(255,0,0,0.25); border-color: red; }
-        .zone.active { border-color: red; border-width: 3px; background: rgba(255,0,0,0.2); }
-        .zone-label { position: absolute; top: -18px; left: 2px; font-size: 10px; background: white; padding: 0 4px; border-radius: 3px; font-weight: bold; }
-        .btn { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 4px; font-size: 13px; }
+        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 5px; }
         .btn:hover { background: #0056b3; }
         .btn-success { background: #28a745; }
         .btn-success:hover { background: #1e7e34; }
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #a71d2a; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .btn-warning:hover { background: #e0a800; }
-        .device-item { padding: 6px 12px; margin: 4px 0; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px; font-size: 13px; }
-        .table-header { font-size: 18px; font-weight: bold; padding: 8px 12px; background: #e9ecef; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .table-grid { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; max-height: 100px; overflow-y: auto; }
-        .table-badge { background: #007bff; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
-        .table-badge:hover { transform: scale(1.1); }
-        .table-badge.active { background: #dc3545; }
-        #qr-output { text-align: center; padding: 10px; min-height: 150px; }
-        #qr-output canvas { margin: 0 auto; max-width: 100%; }
-        input[type="text"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; width: 100%; margin: 4px 0; font-size: 13px; }
-        .stats { display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px; }
-        .stats span { background: #e9ecef; padding: 4px 12px; border-radius: 20px; }
-        .plan-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .plan-item { background: #e9ecef; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; border: 2px solid transparent; }
-        .plan-item.active { border-color: #007bff; background: #cfe2ff; }
-        .plan-item .del { color: red; margin-left: 6px; cursor: pointer; }
-        .drop-zone { border: 3px dashed #007bff; border-radius: 12px; padding: 30px 20px; text-align: center; background: #f8f9fa; margin: 10px 0; cursor: pointer; }
-        .drop-zone:hover { background: #e9ecef; }
-        .drop-zone .icon { font-size: 48px; display: block; margin-bottom: 10px; }
-        #file-input { display: none; }
-        @media (max-width: 768px) { body { flex-direction: column; } #map { min-width: auto; } }
-        .log { font-size: 12px; color: #666; margin: 5px 0; }
+        .panel { background: white; padding: 20px; border-radius: 12px; max-width: 800px; margin: 0 auto; }
+        #log { background: #f8f9fa; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<div id="map" class="panel">
-    <h2>🗺️ План помещения</h2>
-    <div id="plan-list" class="plan-list"></div>
+<div class="panel">
+    <h1>🗺️ Инвентаризация</h1>
+    <p>Нажмите кнопку — должна появиться надпись</p>
     
-    <div id="drop-zone" class="drop-zone">
-        <span class="icon">🖼️</span>
-        <p><b>Нажмите для выбора картинки плана</b></p>
-        <button class="btn btn-warning" id="selectFileBtn">📂 Выбрать файл</button>
-        <input type="file" id="file-input" accept="image/*">
-    </div>
+    <button class="btn" id="btn1">Кнопка 1</button>
+    <button class="btn btn-success" id="btn2">Кнопка 2</button>
+    <button class="btn btn-danger" id="btn3">Кнопка 3</button>
     
-    <div id="map-container">
-        <img id="floor-plan" src="https://via.placeholder.com/1000x700/CCCCCC/000000?text=Загрузите+план" />
-        <div id="zones-container"></div>
-    </div>
-    
-    <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
-        <button class="btn" id="addPlanBtn">➕ Добавить план</button>
-        <button class="btn btn-success" id="generateBtn">⚡ Разметка</button>
-        <button class="btn btn-danger" id="clearBtn">🗑️ Сброс</button>
-    </div>
+    <div id="log">📌 Жду нажатия...</div>
 </div>
 
-<div class="panel" id="info">
-    <h2>📋 Данные</h2>
-    <div id="stats" class="stats"></div>
-    <input type="text" id="search-input" placeholder="Поиск по ID, столу или ФИО...">
-    <button class="btn" id="searchBtn" style="width:100%;">🔍 Найти</button>
-    <div id="table-grid" class="table-grid"></div>
-    <div id="device-list"><p style="color:#999;">Выберите стол на карте</p></div>
-    <hr>
-    <h4>🏷️ QR-код</h4>
-    <div id="qr-output">Выберите стол</div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ============================================================
-// 1. ДАННЫЕ
+// ПРОСТОЙ ТЕСТ
 // ============================================================
-var inventory = [];
-var plans = [];
-var currentPlanIndex = 0;
-var selectedTable = null;
+console.log('✅ Скрипт запустился!');
 
-// Загружаем планы
-try {
-    var savedPlans = localStorage.getItem('plans');
-    if (savedPlans) plans = JSON.parse(savedPlans);
-} catch(e) { plans = []; }
+document.getElementById('btn1').addEventListener('click', function() {
+    document.getElementById('log').innerHTML = '✅ Нажата Кнопка 1';
+    alert('Кнопка 1 работает!');
+});
 
-if (!plans || plans.length === 0) {
-    plans = [{ name: 'План 1', image: '', zones: [] }];
-    localStorage.setItem('plans', JSON.stringify(plans));
-}
+document.getElementById('btn2').addEventListener('click', function() {
+    document.getElementById('log').innerHTML = '✅ Нажата Кнопка 2';
+    alert('Кнопка 2 работает!');
+});
 
-function savePlans() {
-    try { localStorage.setItem('plans', JSON.stringify(plans)); } catch(e) {}
-}
+document.getElementById('btn3').addEventListener('click', function() {
+    document.getElementById('log').innerHTML = '✅ Нажата Кнопка 3';
+    alert('Кнопка 3 работает!');
+});
 
-function getCurrentPlan() {
-    if (!plans || plans.length === 0) {
-        plans = [{ name: 'План 1', image: '', zones: [] }];
-        savePlans();
-    }
-    if (currentPlanIndex >= plans.length) currentPlanIndex = 0;
-    return plans[currentPlanIndex] || plans[0];
-}
-
-// ============================================================
-// 2. ТЕСТОВЫЕ ДАННЫЕ
-// ============================================================
-function generateTestData() {
-    var types = ['Монитор', 'Системный блок', 'Ноутбук', 'Принтер'];
-    var names = ['Иванов', 'Петров', 'Сидоров', 'Козлов', 'Смирнов'];
-    var data = [];
-    for (var t = 1; t <= 136; t++) {
-        var count = 2 + Math.floor(Math.random() * 2);
-        for (var i = 0; i < count; i++) {
-            var type = types[Math.floor(Math.random() * types.length)];
-            data.push({
-                id: 'IT-' + type.substring(0,3).toUpperCase() + '-' + String(t).padStart(3,'0') + (i+1),
-                type: type,
-                sn: 'SN' + String(Math.random()).substring(2,8).toUpperCase(),
-                person: names[Math.floor(Math.random() * names.length)],
-                table: t
-            });
-        }
-    }
-    return data;
-}
-
-try {
-    var savedInv = localStorage.getItem('inventory');
-    if (savedInv) inventory = JSON.parse(savedInv);
-} catch(e) {}
-
-if (!inventory || inventory.length === 0) {
-    inventory = generateTestData();
-    localStorage.setItem('inventory', JSON.stringify(inventory));
-}
-
-function saveInventory() {
-    try { localStorage.setItem('inventory', JSON.stringify(inventory)); } catch(e) {}
-}
-
-// ============================================================
-// 3. ЗАГРУЗКА КАРТИНКИ
-// ============================================================
-function loadImageFile(file) {
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        var imageDataUrl = e.target.result;
-        var plan = getCurrentPlan();
-        plan.image = imageDataUrl;
-        savePlans();
-        var img = document.getElementById('floor-plan');
-        img.src = imageDataUrl;
-        img.onload = function() { renderZones(); };
-        document.getElementById('drop-zone').style.display = 'none';
-        alert('✅ Картинка загружена!');
-    };
-    reader.readAsDataURL(file);
-}
-
-// ============================================================
-// 4. ОТРИСОВКА
-// ============================================================
-function renderPlanList() {
-    var container = document.getElementById('plan-list');
-    if (!container) return;
-    var html = '';
-    for (var i = 0; i < plans.length; i++) {
-        var plan = plans[i];
-        var isActive = (i === currentPlanIndex);
-        var hasImage = plan.image && plan.image.length > 0;
-        html += '<span class="plan-item' + (isActive ? ' active' : '') + '" data-index="' + i + '">';
-        html += (plan.name || 'План ' + (i+1));
-        if (hasImage) html += ' 🖼️';
-        if (plans.length > 1) {
-            html += '<span class="del" data-index="' + i + '">×</span>';
-        }
-        html += '</span>';
-    }
-    container.innerHTML = html;
-    
-    // Привязываем события через addEventListener
-    container.querySelectorAll('.plan-item').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            if (e.target.classList.contains('del')) return;
-            switchPlan(index);
-        });
-    });
-    
-    container.querySelectorAll('.del').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            deletePlan(index);
-        });
-    });
-    
-    var plan = getCurrentPlan();
-    if (plan.image && plan.image.length > 0) {
-        document.getElementById('floor-plan').src = plan.image;
-        document.getElementById('drop-zone').style.display = 'none';
-    } else {
-        document.getElementById('floor-plan').src = 'https://via.placeholder.com/1000x700/CCCCCC/000000?text=Загрузите+план';
-        document.getElementById('drop-zone').style.display = 'block';
-    }
-    renderZones();
-}
-
-function switchPlan(index) {
-    if (index < 0 || index >= plans.length) return;
-    currentPlanIndex = index;
-    savePlans();
-    renderPlanList();
-    renderTableGrid();
-    updateStats();
-    document.getElementById('device-list').innerHTML = '<p style="color:#999;">Выберите стол</p>';
-    document.getElementById('qr-output').innerHTML = 'Выберите стол';
-    selectedTable = null;
-}
-
-function addPlan() {
-    var name = prompt('Введите название плана:', 'План ' + (plans.length + 1));
-    if (!name) return;
-    plans.push({ name: name, image: '', zones: [] });
-    currentPlanIndex = plans.length - 1;
-    savePlans();
-    renderPlanList();
-    document.getElementById('drop-zone').style.display = 'block';
-    document.getElementById('floor-plan').src = 'https://via.placeholder.com/1000x700/CCCCCC/000000?text=Загрузите+план';
-    renderZones();
-    updateStats();
-}
-
-function deletePlan(index) {
-    if (plans.length <= 1) { alert('Нельзя удалить единственный план'); return; }
-    if (!confirm('Удалить план "' + plans[index].name + '"?')) return;
-    plans.splice(index, 1);
-    if (currentPlanIndex >= plans.length) currentPlanIndex = plans.length - 1;
-    savePlans();
-    renderPlanList();
-    renderZones();
-    renderTableGrid();
-    updateStats();
-}
-
-// ============================================================
-// 5. ЗОНЫ
-// ============================================================
-function autoGenerateZones() {
-    var img = document.getElementById('floor-plan');
-    if (!img || !img.naturalWidth || img.naturalWidth < 10) {
-        alert('Сначала загрузите картинку плана! Нажмите на синюю зону и выберите файл.');
-        return;
-    }
-    var plan = getCurrentPlan();
-    var cols = 17;
-    var rows = 8;
-    var cellW = img.naturalWidth / (cols + 1);
-    var cellH = img.naturalHeight / (rows + 1);
-    var newZones = [];
-    var tableNum = 1;
-    for (var r = 0; r < rows; r++) {
-        for (var c = 0; c < cols; c++) {
-            if (tableNum > 136) break;
-            newZones.push({
-                table: tableNum,
-                x: c * cellW + cellW * 0.2,
-                y: r * cellH + cellH * 0.2,
-                w: cellW * 0.6,
-                h: cellH * 0.6
-            });
-            tableNum++;
-        }
-        if (tableNum > 136) break;
-    }
-    plan.zones = newZones;
-    savePlans();
-    renderZones();
-    renderTableGrid();
-    updateStats();
-    alert('✅ Создано ' + newZones.length + ' зон для плана "' + plan.name + '"');
-}
-
-function renderZones() {
-    var container = document.getElementById('zones-container');
-    if (!container) return;
-    container.innerHTML = '';
-    var img = document.getElementById('floor-plan');
-    var plan = getCurrentPlan();
-    var zones = plan.zones || [];
-    if (!img || !img.naturalWidth || zones.length === 0) return;
-
-    var rect = img.getBoundingClientRect();
-    var scaleX = img.naturalWidth / rect.width;
-    var scaleY = img.naturalHeight / rect.height;
-
-    for (var i = 0; i < zones.length; i++) {
-        var zone = zones[i];
-        var div = document.createElement('div');
-        div.className = 'zone';
-        div.style.left = (zone.x / scaleX) + '%';
-        div.style.top = (zone.y / scaleY) + '%';
-        div.style.width = (zone.w / scaleX) + '%';
-        div.style.height = (zone.h / scaleY) + '%';
-        div.dataset.table = zone.table;
-        var label = document.createElement('span');
-        label.className = 'zone-label';
-        label.textContent = '№' + zone.table;
-        div.appendChild(label);
-        
-        (function(tableNum) {
-            div.addEventListener('click', function(e) {
-                e.stopPropagation();
-                selectTable(tableNum);
-            });
-        })(zone.table);
-        
-        container.appendChild(div);
-    }
-}
-
-// ============================================================
-// 6. ВЫБОР СТОЛА
-// ============================================================
-function selectTable(tableNum) {
-    selectedTable = tableNum;
-    var items = [];
-    for (var i = 0; i < inventory.length; i++) {
-        if (inventory[i].table === tableNum) items.push(inventory[i]);
-    }
-    
-    document.querySelectorAll('.zone').forEach(function(el) {
-        el.classList.remove('active');
-        if (parseInt(el.dataset.table) === tableNum) el.classList.add('active');
-    });
-    
-    document.querySelectorAll('.table-badge').forEach(function(el) {
-        el.classList.remove('active');
-        if (parseInt(el.textContent) === tableNum) el.classList.add('active');
-    });
-    
-    var qrContainer = document.getElementById('qr-output');
-    if (items.length > 0) {
-        var qrData = window.location.href.split('?')[0] + '?table=' + tableNum;
-        qrContainer.innerHTML = '';
-        try {
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrContainer, { text: qrData, width: 150, height: 150 });
-            } else {
-                qrContainer.innerHTML = '<p>⚠️ QR-библиотека не загружена</p>';
-            }
-        } catch(e) {
-            qrContainer.innerHTML = '<p>⚠️ Ошибка QR</p>';
-        }
-    } else {
-        qrContainer.innerHTML = '<p style="color:#999;">Стол №' + tableNum + ' — пуст</p>';
-    }
-    renderDeviceList(items, tableNum);
-}
-
-function renderDeviceList(items, tableNum) {
-    var container = document.getElementById('device-list');
-    if (!container) return;
-    if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#999;">📍 Стол №' + tableNum + ' — оборудование не найдено</p>';
-        return;
-    }
-    var html = '<div class="table-header"><span>📍 Стол №' + tableNum + '</span><span>Всего: ' + items.length + '</span></div>';
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        html += '<div class="device-item"><b>' + item.id + '</b> — ' + item.type + ' (SN: ' + (item.sn || '—') + ') 👤 ' + (item.person || '—') + '</div>';
-    }
-    container.innerHTML = html;
-}
-
-// ============================================================
-// 7. ПОИСК
-// ============================================================
-function searchDevice() {
-    var query = document.getElementById('search-input').value.toLowerCase().trim();
-    if (!query) { 
-        if (selectedTable) {
-            var items = [];
-            for (var i = 0; i < inventory.length; i++) {
-                if (inventory[i].table === selectedTable) items.push(inventory[i]);
-            }
-            renderDeviceList(items, selectedTable);
-        } else {
-            document.getElementById('device-list').innerHTML = '<p style="color:#999;">Выберите стол</p>';
-        }
-        return; 
-    }
-    var found = [];
-    for (var j = 0; j < inventory.length; j++) {
-        var item = inventory[j];
-        if (item.id.toLowerCase().includes(query) || 
-            String(item.table).includes(query) ||
-            (item.person && item.person.toLowerCase().includes(query)) ||
-            (item.type && item.type.toLowerCase().includes(query))) {
-            found.push(item);
-        }
-    }
-    if (found.length === 0) {
-        document.getElementById('device-list').innerHTML = '<p style="color:red;">❌ Ничего не найдено</p>';
-        return;
-    }
-    var tables = [];
-    for (var k = 0; k < found.length; k++) {
-        if (tables.indexOf(found[k].table) === -1) tables.push(found[k].table);
-    }
-    if (tables.length === 1) {
-        selectTable(tables[0]);
-    } else {
-        var html = '<div class="table-header">🔍 Результаты поиска (найдено: ' + found.length + ')</div>';
-        for (var l = 0; l < found.length; l++) {
-            var item = found[l];
-            html += '<div class="device-item"><b>' + item.id + '</b> — ' + item.type + ' (Стол №' + item.table + ') 👤 ' + (item.person || '—') + '</div>';
-        }
-        document.getElementById('device-list').innerHTML = html;
-    }
-}
-
-// ============================================================
-// 8. СЕТКА СТОЛОВ
-// ============================================================
-function renderTableGrid() {
-    var grid = document.getElementById('table-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    var uniqueTables = [];
-    for (var i = 0; i < inventory.length; i++) {
-        var t = inventory[i].table;
-        if (uniqueTables.indexOf(t) === -1) uniqueTables.push(t);
-    }
-    uniqueTables.sort(function(a,b){return a-b;});
-    for (var j = 0; j < uniqueTables.length; j++) {
-        var t = uniqueTables[j];
-        var badge = document.createElement('div');
-        badge.className = 'table-badge';
-        badge.textContent = t;
-        (function(tableNum) {
-            badge.addEventListener('click', function() { selectTable(tableNum); });
-        })(t);
-        grid.appendChild(badge);
-    }
-}
-
-// ============================================================
-// 9. СТАТИСТИКА И СБРОС
-// ============================================================
-function updateStats() {
-    var uniqueTables = [];
-    for (var i = 0; i < inventory.length; i++) {
-        var t = inventory[i].table;
-        if (uniqueTables.indexOf(t) === -1) uniqueTables.push(t);
-    }
-    document.getElementById('stats').innerHTML = 
-        '<span>📦 Всего: ' + inventory.length + '</span>' +
-        '<span>🪑 Столов: ' + uniqueTables.length + '</span>' +
-        '<span>📋 Планов: ' + plans.length + '</span>';
-}
-
-function clearAll() {
-    if (!confirm('Удалить все данные?')) return;
-    plans = [{ name: 'План 1', image: '', zones: [] }];
-    currentPlanIndex = 0;
-    inventory = generateTestData();
-    savePlans();
-    saveInventory();
-    document.getElementById('zones-container').innerHTML = '';
-    document.getElementById('device-list').innerHTML = '<p style="color:#999;">Выберите стол</p>';
-    document.getElementById('qr-output').innerHTML = 'Выберите стол';
-    document.getElementById('d (...)
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('log').innerHTML = '✅ Страница загружена! Нажмите любую кнопку.';
+    console.log('✅ DOM загружен');
+});
+</script>
+</body>
+</html>
