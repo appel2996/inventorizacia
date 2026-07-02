@@ -77,30 +77,32 @@
     <div class="panel left">
         <h1>🗺️ Инвентаризация</h1>
         <div class="flex">
-            <button class="btn btn-yellow" id="loadBtn">📂 Загрузить</button>
-            <button class="btn btn-purple" id="drawBtn">✏️ Рисовать</button>
-            <button class="btn btn-green" id="finishBtn" style="display:none;">✅ Готово</button>
-            <button class="btn btn-orange" id="deselectBtn">🔽 Снять</button>
-            <button class="btn btn-teal" id="showAllBtn">👁️ Показать</button>
-            <button class="btn btn-pink" id="hideAllBtn">🙈 Скрыть</button>
-            <button class="btn btn-red" id="clearBtn">🗑️ Очистить</button>
-            <input type="file" id="fileInput" accept="image/*" multiple>
+            <button class="btn btn-yellow" onclick="document.getElementById('fileInput').click()">📂 Загрузить</button>
+            <button class="btn btn-purple" onclick="toggleDrawMode()">✏️ Рисовать</button>
+            <button class="btn btn-green" id="finishBtn" style="display:none;" onclick="finishDrawMode()">✅ Готово</button>
+            <button class="btn btn-orange" onclick="deselectAll()">🔽 Снять</button>
+            <button class="btn btn-teal" onclick="showAll()">👁️ Показать</button>
+            <button class="btn btn-pink" onclick="hideAll()">🙈 Скрыть</button>
+            <button class="btn btn-red" onclick="clearAll()">🗑️ Очистить</button>
+            <input type="file" id="fileInput" accept="image/*" multiple onchange="loadFiles(this)">
         </div>
         <div id="image-list"></div>
-        <div id="map"><div class="placeholder">Загрузите картинку</div></div>
+        <div id="map" onclick="handleMapClick(event)">
+            <div class="placeholder">Загрузите картинку</div>
+        </div>
         <div class="log" id="log">Ожидание действий...</div>
     </div>
     <div class="panel right">
         <h2>📋 Информация</h2>
-        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола...">
+        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола..." oninput="searchTables(this.value)">
         <div class="table-grid" id="tableGrid"></div>
         <div id="deviceList"><p style="color:#999;">Выберите стол на карте</p></div>
         <div class="qr-section">
             <h4>🏷️ QR-код стола</h4>
             <div id="qr-output"><span class="qr-placeholder">Выберите стол</span></div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn" id="printQrBtn" style="display:none;">🖨️ Печать QR</button>
-                <button class="btn btn-green" id="printAllQrBtn" style="display:none;">📦 Печать всех QR</button>
+                <button class="btn" id="printQrBtn" style="display:none;" onclick="printQR()">🖨️ Печать QR</button>
+                <button class="btn btn-green" id="printAllQrBtn" style="display:none;" onclick="printAllQR()">📦 Печать всех QR</button>
             </div>
         </div>
     </div>
@@ -117,8 +119,6 @@ var tableCounter = 0;
 var selectedTable = null;
 var zonesVisible = true;
 var devices = {};
-var isDrawing = false;
-var startX, startY, currentRect;
 
 // ============================================================
 // 1. ЛОГ
@@ -133,14 +133,22 @@ function logMsg(msg) {
 function loadFiles(input) {
     var files = input.files;
     if (!files || files.length === 0) return;
+    
     for (var i = 0; i < files.length; i++) {
         var file = files[i];
         var reader = new FileReader();
         reader.onload = (function(f) {
             return function(ev) {
-                images.push({ name: f.name, data: ev.target.result, zones: [] });
+                images.push({
+                    name: f.name,
+                    data: ev.target.result,
+                    zones: []
+                });
                 renderImages();
-                if (images.length === 1) { currentIndex = 0; showImage(0); }
+                if (images.length === 1) {
+                    currentIndex = 0;
+                    showImage(0);
+                }
                 logMsg('✅ Загружено: ' + images.length + ' картинок');
             };
         })(file);
@@ -149,6 +157,9 @@ function loadFiles(input) {
     input.value = '';
 }
 
+// ============================================================
+// 3. ОТРИСОВКА СПИСКА КАРТИНОК
+// ============================================================
 function renderImages() {
     var html = '';
     for (var i = 0; i < images.length; i++) {
@@ -183,10 +194,14 @@ function deleteImage(index) {
     logMsg('🗑️ Картинка удалена');
 }
 
+// ============================================================
+// 4. ПОКАЗ КАРТИНКИ
+// ============================================================
 function showImage(index) {
     if (index < 0 || index >= images.length) return;
     currentIndex = index;
     var img = images[index];
+    
     var map = document.getElementById('map');
     map.innerHTML = '';
     var imgEl = document.createElement('img');
@@ -195,14 +210,21 @@ function showImage(index) {
     imgEl.style.height = 'auto';
     imgEl.style.display = 'block';
     map.appendChild(imgEl);
+    
     for (var i = 0; i < img.zones.length; i++) {
         var z = img.zones[i];
         createZone(z.table, z.x, z.y, z.w, z.h);
     }
+    
     if (!zonesVisible) {
-        document.querySelectorAll('.zone').forEach(function(el) { el.classList.add('hidden'); });
-        document.querySelectorAll('.table-badge').forEach(function(el) { el.classList.add('hidden-badge'); });
+        document.querySelectorAll('.zone').forEach(function(el) {
+            el.classList.add('hidden');
+        });
+        document.querySelectorAll('.table-badge').forEach(function(el) {
+            el.classList.add('hidden-badge');
+        });
     }
+    
     renderTableGrid();
     document.getElementById('deviceList').innerHTML = '<p style="color:#999;">Выберите стол на карте</p>';
     document.getElementById('qr-output').innerHTML = '<span class="qr-placeholder">Выберите стол</span>';
@@ -214,7 +236,7 @@ function showImage(index) {
 }
 
 // ============================================================
-// 3. РИСОВАНИЕ СТОЛОВ
+// 5. РИСОВАНИЕ
 // ============================================================
 function toggleDrawMode() {
     if (currentIndex < 0 || images.length === 0) {
@@ -222,36 +244,41 @@ function toggleDrawMode() {
         return;
     }
     drawMode = !drawMode;
-    document.getElementById('drawBtn').textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать';
+    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
+    btn.textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать';
     document.getElementById('finishBtn').style.display = drawMode ? 'inline-block' : 'none';
     document.getElementById('map').style.cursor = drawMode ? 'crosshair' : 'default';
-    logMsg(drawMode ? '✏️ Кликните на карте для добавления стола' : '⏹ Режим выключен');
+    logMsg(drawMode ? '✏️ Режим рисования — кликните на карте' : '⏹ Режим выключен');
 }
 
 function finishDrawMode() {
     drawMode = false;
-    document.getElementById('drawBtn').textContent = '✏️ Рисовать';
+    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
+    btn.textContent = '✏️ Рисовать';
     document.getElementById('finishBtn').style.display = 'none';
     document.getElementById('map').style.cursor = 'default';
     logMsg('✅ Рисование завершено');
 }
 
-// Клик по карте
 function handleMapClick(e) {
     if (!drawMode) return;
     var target = e.target;
     if (target.tagName !== 'IMG') return;
+    
     var rect = document.getElementById('map').getBoundingClientRect();
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
+    
     tableCounter++;
     var num = tableCounter;
     var size = 30;
     var zx = x - size/2;
     var zy = y - size/2;
+    
     var img = images[currentIndex];
     img.zones.push({ table: num, x: zx, y: zy, w: size, h: size });
     createZone(num, zx, zy, size, size);
+    
     if (!devices[num]) {
         devices[num] = [];
         var types = ['Монитор', 'Системный блок', 'Ноутбук'];
@@ -266,17 +293,19 @@ function handleMapClick(e) {
             });
         }
     }
+    
     if (!zonesVisible) {
         document.querySelectorAll('.zone').forEach(function(el) {
             if (parseInt(el.dataset.table) === num) el.classList.add('hidden');
         });
     }
+    
     renderTableGrid();
     logMsg('✅ Добавлен стол №' + num);
 }
 
 // ============================================================
-// 4. ЗОНЫ
+// 6. ЗОНЫ
 // ============================================================
 function createZone(num, x, y, w, h) {
     var div = document.createElement('div');
@@ -286,32 +315,45 @@ function createZone(num, x, y, w, h) {
     div.style.width = w + 'px';
     div.style.height = h + 'px';
     div.dataset.table = num;
+    
     var label = document.createElement('span');
     label.className = 'zone-label';
     label.textContent = '№' + num;
     div.appendChild(label);
+    
     var del = document.createElement('button');
     del.className = 'del-zone';
     del.textContent = '×';
-    del.onclick = function(e) { e.stopPropagation(); deleteTable(num); };
+    del.onclick = function(e) {
+        e.stopPropagation();
+        deleteTable(num);
+    };
     div.appendChild(del);
+    
     div.onclick = function(e) {
         if (e.target.tagName === 'BUTTON') return;
         selectTable(num);
     };
+    
     document.getElementById('map').appendChild(div);
 }
 
 function deleteTable(num) {
     if (!confirm('Удалить стол №' + num + '?')) return;
+    
     var img = images[currentIndex];
     for (var i = 0; i < img.zones.length; i++) {
-        if (img.zones[i].table === num) { img.zones.splice(i, 1); break; }
+        if (img.zones[i].table === num) {
+            img.zones.splice(i, 1);
+            break;
+        }
     }
     delete devices[num];
+    
     document.querySelectorAll('.zone').forEach(function(el) {
         if (parseInt(el.dataset.table) === num) el.remove();
     });
+    
     if (selectedTable === num) {
         selectedTable = null;
         document.getElementById('deviceList').innerHTML = '<p style="color:#999;">Выберите стол</p>';
@@ -319,28 +361,34 @@ function deleteTable(num) {
         document.getElementById('printQrBtn').style.display = 'none';
         document.getElementById('printAllQrBtn').style.display = 'none';
     }
+    
     renderTableGrid();
     logMsg('🗑️ Стол №' + num + ' удалён');
 }
 
 // ============================================================
-// 5. ВЫБОР СТОЛА
+// 7. ВЫБОР СТОЛА
 // ============================================================
 function selectTable(num) {
     selectedTable = num;
+    
     document.querySelectorAll('.zone').forEach(function(el) {
         el.classList.remove('active');
         if (parseInt(el.dataset.table) === num) el.classList.add('active');
     });
+    
     document.querySelectorAll('.table-badge').forEach(function(el) {
         el.classList.remove('active');
         if (parseInt(el.textContent) === num) el.classList.add('active');
     });
+    
     var items = devices[num] || [];
     renderDevices(items, num);
+    
     var qrContainer = document.getElementById('qr-output');
     var url = window.location.href.split('?')[0] + '?table=' + num;
     qrContainer.innerHTML = '';
+    
     var img = document.createElement('img');
     img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(url);
     img.style.maxWidth = '150px';
@@ -349,18 +397,21 @@ function selectTable(num) {
         qrContainer.innerHTML = '<span class="qr-placeholder">⚠️ QR-генератор недоступен</span><br><a href="' + url + '" target="_blank">Ссылка</a>';
     };
     qrContainer.appendChild(img);
+    
     var link = document.createElement('div');
     link.style.fontSize = '11px';
     link.style.marginTop = '5px';
     link.innerHTML = '<a href="' + url + '" target="_blank">🔗 Ссылка для сканирования</a>';
     qrContainer.appendChild(link);
+    
     document.getElementById('printQrBtn').style.display = 'inline-block';
     document.getElementById('printAllQrBtn').style.display = 'inline-block';
+    
     logMsg('📍 Выбран стол №' + num);
 }
 
 // ============================================================
-// 6. УСТРОЙСТВА
+// 8. УСТРОЙСТВА
 // ============================================================
 function renderDevices(items, num) {
     var container = document.getElementById('deviceList');
@@ -374,30 +425,4 @@ function renderDevices(items, num) {
         html += '<div class="device-item">';
         html += '<span class="dev-id">' + item.id + '</span>';
         html += '<input class="dev-type" value="' + item.type + '" onchange="updateDevice(' + num + ',' + i + ',\'type\',this.value)" placeholder="Тип">';
-        html += '<input class="dev-person" value="' + (item.person || '') + '" onchange="updateDevice(' + num + ',' + i + ',\'person\',this.value)" placeholder="Ответственный">';
-        html += '<span class="dev-actions">';
-        html += '<button class="btn btn-red btn-sm" onclick="deleteDevice(' + num + ',' + i + ')">🗑️</button>';
-        html += '</span>';
-        html += '</div>';
-    }
-    container.innerHTML = html;
-}
-
-function updateDevice(tableNum, index, field, value) {
-    if (!devices[tableNum] || index < 0 || index >= devices[tableNum].length) return;
-    devices[tableNum][index][field] = value;
-    logMsg('✅ Обновлено устройство');
-}
-
-function deleteDevice(tableNum, index) {
-    if (!confirm('Удалить устройство?')) return;
-    if (!devices[tableNum]) return;
-    devices[tableNum].splice(index, 1);
-    if (devices[tableNum].length === 0) delete devices[tableNum];
-    selectTable(tableNum);
-    logMsg('🗑️ Устройство удалено');
-}
-
-function addDevice(tableNum) {
-    if (!devices[tableNum]) devices[tableNum] = [];
-    var types = ['Монитор', 'Системный бло (...)
+        html += '<input class="dev-person" value="' + (item.person || '') + '" onchange="updateDevice(' + num + ',' + i + ',\'person\',this.value)" placeho (...)
