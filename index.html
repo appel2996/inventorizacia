@@ -77,14 +77,14 @@
     <div class="panel left">
         <h1>🗺️ Инвентаризация</h1>
         <div class="flex">
-            <button class="btn btn-yellow" onclick="document.getElementById('fileInput').click()">📂 Загрузить</button>
+            <button class="btn btn-yellow" onclick="openFileDialog()">📂 Загрузить</button>
             <button class="btn btn-purple" onclick="toggleDrawMode()">✏️ Рисовать</button>
             <button class="btn btn-green" id="finishBtn" style="display:none;" onclick="finishDrawMode()">✅ Готово</button>
             <button class="btn btn-orange" onclick="deselectAll()">🔽 Снять</button>
             <button class="btn btn-teal" onclick="showAll()">👁️ Показать</button>
             <button class="btn btn-pink" onclick="hideAll()">🙈 Скрыть</button>
             <button class="btn btn-red" onclick="clearAll()">🗑️ Очистить</button>
-            <input type="file" id="fileInput" accept="image/*" multiple onchange="loadFiles(this)">
+            <input type="file" id="fileInput" accept="image/*" multiple>
         </div>
         <div id="image-list"></div>
         <div id="map" onclick="handleMapClick(event)">
@@ -109,8 +109,7 @@
 </div>
 
 <script>
-// ============================================================
-// ВСЕ ДАННЫЕ
+// ВСЕ ФУНКЦИИ ОБЪЯВЛЕНЫ ЗДЕСЬ
 // ============================================================
 var images = [];
 var currentIndex = -1;
@@ -121,15 +120,19 @@ var zonesVisible = true;
 var devices = {};
 
 // ============================================================
-// 1. ЛОГ
+// ЛОГ
 // ============================================================
 function logMsg(msg) {
     document.getElementById('log').innerHTML = msg;
 }
 
 // ============================================================
-// 2. ЗАГРУЗКА КАРТИНОК
+// ЗАГРУЗКА
 // ============================================================
+function openFileDialog() {
+    document.getElementById('fileInput').click();
+}
+
 function loadFiles(input) {
     var files = input.files;
     if (!files || files.length === 0) return;
@@ -157,8 +160,13 @@ function loadFiles(input) {
     input.value = '';
 }
 
+// Привязываем событие загрузки
+document.getElementById('fileInput').onchange = function() {
+    loadFiles(this);
+};
+
 // ============================================================
-// 3. ОТРИСОВКА СПИСКА КАРТИНОК
+// КАРТИНКИ
 // ============================================================
 function renderImages() {
     var html = '';
@@ -194,9 +202,6 @@ function deleteImage(index) {
     logMsg('🗑️ Картинка удалена');
 }
 
-// ============================================================
-// 4. ПОКАЗ КАРТИНКИ
-// ============================================================
 function showImage(index) {
     if (index < 0 || index >= images.length) return;
     currentIndex = index;
@@ -236,7 +241,7 @@ function showImage(index) {
 }
 
 // ============================================================
-// 5. РИСОВАНИЕ
+// РИСОВАНИЕ
 // ============================================================
 function toggleDrawMode() {
     if (currentIndex < 0 || images.length === 0) {
@@ -305,7 +310,7 @@ function handleMapClick(e) {
 }
 
 // ============================================================
-// 6. ЗОНЫ
+// ЗОНЫ
 // ============================================================
 function createZone(num, x, y, w, h) {
     var div = document.createElement('div');
@@ -367,7 +372,7 @@ function deleteTable(num) {
 }
 
 // ============================================================
-// 7. ВЫБОР СТОЛА
+// ВЫБОР СТОЛА
 // ============================================================
 function selectTable(num) {
     selectedTable = num;
@@ -411,7 +416,7 @@ function selectTable(num) {
 }
 
 // ============================================================
-// 8. УСТРОЙСТВА
+// УСТРОЙСТВА
 // ============================================================
 function renderDevices(items, num) {
     var container = document.getElementById('deviceList');
@@ -425,4 +430,6 @@ function renderDevices(items, num) {
         html += '<div class="device-item">';
         html += '<span class="dev-id">' + item.id + '</span>';
         html += '<input class="dev-type" value="' + item.type + '" onchange="updateDevice(' + num + ',' + i + ',\'type\',this.value)" placeholder="Тип">';
-        html += '<input class="dev-person" value="' + (item.person || '') + '" onchange="updateDevice(' + num + ',' + i + ',\'person\',this.value)" placeho (...)
+        html += '<input class="dev-person" value="' + (item.person || '') + '" onchange="updateDevice(' + num + ',' + i + ',\'person\',this.value)" placeholder="Ответственный">';
+        html += '<span class="dev-actions">';
+        html += '<button clas (...)
