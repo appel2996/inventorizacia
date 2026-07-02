@@ -27,48 +27,40 @@
         .flex { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; align-items: center; }
         
         #image-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-        .image-item { border: 2px solid #dee2e6; border-radius: 8px; padding: 8px; background: white; cursor: pointer; transition: 0.3s; width: 150px; text-align: center; position: relative; }
-        .image-item:hover { border-color: #007bff; }
+        .image-item { border: 2px solid #dee2e6; border-radius: 8px; padding: 8px; background: white; cursor: pointer; width: 150px; text-align: center; position: relative; }
         .image-item.active { border-color: #007bff; background: #e9ecef; }
         .image-item img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; }
-        .image-item .name { font-size: 12px; margin-top: 4px; color: #333; }
-        .image-item .del-btn { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1; }
-        .image-item .del-btn:hover { background: #a71d2a; }
+        .image-item .name { font-size: 12px; margin-top: 4px; }
+        .image-item .del-btn { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; }
         .image-item .zone-count { font-size: 10px; color: #666; }
         
         #map { width: 100%; min-height: 500px; border: 2px dashed #007bff; border-radius: 12px; margin: 10px 0; background: #f8f9fa; position: relative; overflow: hidden; }
         #map img { width: 100%; height: auto; display: block; }
         #map .placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999; font-size: 18px; text-align: center; }
         
-        .zone { position: absolute; border: 2px solid #007bff; background: rgba(0,123,255,0.15); cursor: pointer; transition: opacity 0.3s; }
+        .zone { position: absolute; border: 2px solid #007bff; background: rgba(0,123,255,0.15); cursor: pointer; }
         .zone:hover { background: rgba(255,0,0,0.25); border-color: red; }
         .zone.active { border-color: red; border-width: 3px; background: rgba(255,0,0,0.2); }
         .zone.hidden { opacity: 0; pointer-events: none; }
         .zone-label { position: absolute; top: -18px; left: 2px; font-size: 10px; background: white; padding: 0 4px; border-radius: 3px; font-weight: bold; }
-        .zone .delete-zone-btn { position: absolute; top: -18px; right: 0; background: #dc3545; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; font-size: 10px; line-height: 1; display: none; }
-        .zone:hover .delete-zone-btn { display: block; }
+        .zone .del-zone { position: absolute; top: -18px; right: 0; background: #dc3545; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; font-size: 10px; display: none; }
+        .zone:hover .del-zone { display: block; }
         
-        #info { margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 100px; }
-        .log { background: #e9ecef; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; color: #333; white-space: pre-wrap; max-height: 150px; overflow-y: auto; }
+        #info { margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .log { background: #e9ecef; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; max-height: 150px; overflow-y: auto; }
         input[type="file"] { display: none; }
         
-        .drawing { border-color: red !important; background: rgba(255,0,0,0.1) !important; }
-        .selected-table { background: #cfe2ff; padding: 5px 10px; border-radius: 4px; margin: 2px; display: inline-block; }
         .table-grid { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; max-height: 120px; overflow-y: auto; }
         .table-badge { background: #007bff; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; position: relative; }
         .table-badge:hover { transform: scale(1.1); }
         .table-badge.active { background: #dc3545; }
-        .table-badge .delete-badge { position: absolute; top: -6px; right: -6px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 16px; height: 16px; cursor: pointer; font-size: 10px; line-height: 1; display: none; }
-        .table-badge:hover .delete-badge { display: block; }
+        .table-badge .del-badge { position: absolute; top: -6px; right: -6px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 16px; height: 16px; cursor: pointer; font-size: 10px; display: none; }
+        .table-badge:hover .del-badge { display: block; }
         .table-badge.hidden-badge { opacity: 0.4; }
         
         #device-list { max-height: 300px; overflow-y: auto; }
         .device-item { padding: 6px 12px; margin: 4px 0; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px; font-size: 13px; }
-        .table-header { font-size: 16px; font-weight: bold; padding: 8px 12px; background: #e9ecef; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .no-select { user-select: none; }
-        
-        .btn-group { display: flex; flex-wrap: wrap; gap: 5px; }
-        .visibility-indicator { font-size: 12px; color: #666; margin-left: 10px; }
+        .table-header { font-size: 16px; font-weight: bold; padding: 8px 12px; background: #e9ecef; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -77,27 +69,27 @@
     <h1>🗺️ Инвентаризация</h1>
     
     <div class="flex">
-        <button class="btn btn-yellow" id="loadImageBtn">📂 Загрузить картинку</button>
-        <button class="btn btn-purple" id="drawModeBtn">✏️ Рисовать столы</button>
-        <button class="btn btn-green" id="finishDrawBtn" style="display:none;">✅ Закончить рисование</button>
-        <button class="btn btn-orange" id="deselectBtn">🔽 Снять выделение</button>
-        <button class="btn btn-teal" id="showAllBtn">👁️ Показать все</button>
-        <button class="btn btn-pink" id="hideAllBtn">🙈 Скрыть все</button>
-        <button class="btn btn-red" id="clearBtn">🗑️ Очистить всё</button>
-        <input type="file" id="fileInput" accept="image/*" multiple>
+        <button class="btn btn-yellow" onclick="document.getElementById('fileInput').click()">📂 Загрузить картинку</button>
+        <button class="btn btn-purple" id="drawBtn">✏️ Рисовать столы</button>
+        <button class="btn btn-green" id="finishBtn" style="display:none;">✅ Закончить</button>
+        <button class="btn btn-orange" onclick="deselectAll()">🔽 Снять выделение</button>
+        <button class="btn btn-teal" onclick="showAll()">👁️ Показать все</button>
+        <button class="btn btn-pink" onclick="hideAll()">🙈 Скрыть все</button>
+        <button class="btn btn-red" onclick="clearAll()">🗑️ Очистить всё</button>
+        <input type="file" id="fileInput" accept="image/*" multiple onchange="loadFiles(this)">
     </div>
     
     <div id="image-list"></div>
     
-    <div id="map">
-        <div class="placeholder">Загрузите картинку и нажмите «Рисовать столы»</div>
+    <div id="map" onclick="handleMapClick(event)">
+        <div class="placeholder">Загрузите картинку</div>
     </div>
     
     <div id="info">
-        <p><b>📋 Информация:</b></p>
-        <div id="log">Ожидание действий...</div>
-        <div id="table-grid" class="table-grid"></div>
-        <div id="device-list"></div>
+        <b>📋 Информация:</b>
+        <div class="log" id="log">Ожидание действий...</div>
+        <div class="table-grid" id="tableGrid"></div>
+        <div id="deviceList"></div>
     </div>
 </div>
 
@@ -106,108 +98,77 @@
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ============================================================
 var images = [];
-var currentImageIndex = -1;
+var currentIndex = -1;
 var drawMode = false;
 var isDrawing = false;
-var startX, startY, currentRect;
+var startX, startY;
 var tableCounter = 0;
 var selectedTable = null;
-var inventory = [];
 var zonesVisible = true;
-
-// Элементы
-var map = document.getElementById('map');
-var log = document.getElementById('log');
-var fileInput = document.getElementById('fileInput');
-var imageList = document.getElementById('image-list');
-var tableGrid = document.getElementById('table-grid');
-var deviceList = document.getElementById('device-list');
 
 // ============================================================
 // 1. ЗАГРУЗКА КАРТИНОК
 // ============================================================
-document.getElementById('loadImageBtn').addEventListener('click', function() {
-    fileInput.click();
-});
-
-fileInput.addEventListener('change', function(e) {
-    var files = e.target.files;
+function loadFiles(input) {
+    var files = input.files;
     if (!files || files.length === 0) return;
     
     for (var i = 0; i < files.length; i++) {
         var file = files[i];
         var reader = new FileReader();
         reader.onload = function(ev) {
-            var dataUrl = ev.target.result;
-            var id = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            images.push({ id: id, name: file.name, data: dataUrl, zones: [] });
-            renderImageList();
+            images.push({
+                name: file.name,
+                data: ev.target.result,
+                zones: []
+            });
+            renderImages();
             if (images.length === 1) {
-                currentImageIndex = 0;
+                currentIndex = 0;
                 showImage(0);
             }
-            log.innerHTML = '✅ Загружено картинок: ' + images.length;
+            logMsg('✅ Загружено: ' + images.length + ' картинок');
         };
         reader.readAsDataURL(file);
     }
-    this.value = '';
-});
-
-// ============================================================
-// 2. УДАЛЕНИЕ ОДНОЙ КАРТИНКИ
-// ============================================================
-function deleteImage(index) {
-    if (index < 0 || index >= images.length) return;
-    if (!confirm('Удалить картинку "' + images[index].name + '" со всеми столами?')) return;
-    
-    images.splice(index, 1);
-    if (currentImageIndex >= images.length) currentImageIndex = images.length - 1;
-    if (images.length === 0) {
-        map.innerHTML = '<div class="placeholder">Загрузите картинку</div>';
-        currentImageIndex = -1;
-        tableGrid.innerHTML = '';
-        deviceList.innerHTML = '';
-    } else {
-        showImage(currentImageIndex);
-    }
-    renderImageList();
-    log.innerHTML = '🗑️ Картинка удалена. Осталось: ' + images.length;
+    input.value = '';
 }
 
 // ============================================================
-// 3. ОТОБРАЖЕНИЕ СПИСКА КАРТИНОК
+// 2. ОТОБРАЖЕНИЕ СПИСКА КАРТИНОК
 // ============================================================
-function renderImageList() {
+function renderImages() {
     var html = '';
     for (var i = 0; i < images.length; i++) {
         var img = images[i];
-        var active = (i === currentImageIndex) ? ' active' : '';
-        html += '<div class="image-item' + active + '" data-index="' + i + '">';
+        var active = (i === currentIndex) ? ' active' : '';
+        html += '<div class="image-item' + active + '" onclick="showImage(' + i + ')">';
         html += '<img src="' + img.data + '" />';
         html += '<div class="name">' + img.name + '</div>';
         html += '<div class="zone-count">Столов: ' + img.zones.length + '</div>';
-        html += '<button class="del-btn" data-index="' + i + '" title="Удалить картинку">×</button>';
+        html += '<button class="del-btn" onclick="event.stopPropagation();deleteImage(' + i + ')">×</button>';
         html += '</div>';
     }
-    imageList.innerHTML = html;
-    
-    imageList.querySelectorAll('.image-item').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            if (e.target.classList.contains('del-btn')) return;
-            currentImageIndex = index;
-            showImage(index);
-            renderImageList();
-        });
-    });
-    
-    imageList.querySelectorAll('.del-btn').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            deleteImage(index);
-        });
-    });
+    document.getElementById('image-list').innerHTML = html;
+}
+
+// ============================================================
+// 3. УДАЛЕНИЕ КАРТИНКИ
+// ============================================================
+function deleteImage(index) {
+    if (!confirm('Удалить картинку?')) return;
+    images.splice(index, 1);
+    if (currentIndex >= images.length) currentIndex = images.length - 1;
+    if (images.length === 0) {
+        document.getElementById('map').innerHTML = '<div class="placeholder">Загрузите картинку</div>';
+        currentIndex = -1;
+        document.getElementById('tableGrid').innerHTML = '';
+        document.getElementById('deviceList').innerHTML = '';
+    } else {
+        showImage(currentIndex);
+    }
+    renderImages();
+    logMsg('🗑️ Картинка удалена');
 }
 
 // ============================================================
@@ -215,9 +176,10 @@ function renderImageList() {
 // ============================================================
 function showImage(index) {
     if (index < 0 || index >= images.length) return;
+    currentIndex = index;
     var img = images[index];
-    currentImageIndex = index;
     
+    var map = document.getElementById('map');
     map.innerHTML = '';
     var imgEl = document.createElement('img');
     imgEl.src = img.data;
@@ -226,13 +188,12 @@ function showImage(index) {
     imgEl.style.display = 'block';
     map.appendChild(imgEl);
     
-    var zonesData = img.zones || [];
-    for (var i = 0; i < zonesData.length; i++) {
-        var z = zonesData[i];
-        createZoneElement(z.table, z.x, z.y, z.w, z.h);
+    // Восстанавливаем зоны
+    for (var i = 0; i < img.zones.length; i++) {
+        var z = img.zones[i];
+        createZone(z.table, z.x, z.y, z.w, z.h);
     }
     
-    // Применяем текущее состояние видимости
     if (!zonesVisible) {
         document.querySelectorAll('.zone').forEach(function(el) {
             el.classList.add('hidden');
@@ -242,16 +203,209 @@ function showImage(index) {
         });
     }
     
-    log.innerHTML = '🖼️ ' + img.name + ' (столов: ' + zonesData.length + ')';
     renderTableGrid();
+    document.getElementById('deviceList').innerHTML = '<p style="color:#999;">Выберите стол</p>';
     selectedTable = null;
-    deviceList.innerHTML = '<p style="color:#999;">Выберите стол</p>';
+    renderImages();
+    logMsg('🖼️ ' + img.name + ' (столов: ' + img.zones.length + ')');
 }
 
 // ============================================================
-// 5. ПОКАЗАТЬ / СКРЫТЬ ВСЕ ВЫДЕЛЕНИЯ
+// 5. РИСОВАНИЕ СТОЛОВ
 // ============================================================
-document.getElementById('showAllBtn').addEventListener('click', function() {
+document.getElementById('drawBtn').onclick = function() {
+    if (currentIndex < 0 || images.length === 0) {
+        alert('Сначала загрузите картинку!');
+        return;
+    }
+    drawMode = !drawMode;
+    this.textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать столы';
+    document.getElementById('finishBtn').style.display = drawMode ? 'inline-block' : 'none';
+    document.getElementById('map').style.cursor = drawMode ? 'crosshair' : 'default';
+    logMsg(drawMode ? '✏️ Режим рисования' : '⏹ Режим выключен');
+};
+
+document.getElementById('finishBtn').onclick = function() {
+    drawMode = false;
+    document.getElementById('drawBtn').textContent = '✏️ Рисовать столы';
+    this.style.display = 'none';
+    document.getElementById('map').style.cursor = 'default';
+    logMsg('✅ Рисование завершено');
+};
+
+function handleMapClick(e) {
+    if (!drawMode) return;
+    var target = e.target;
+    if (target.tagName !== 'IMG') return;
+    
+    var rect = document.getElementById('map').getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var y = e.clientY - rect.top;
+    
+    // Просто добавляем стол по клику
+    tableCounter++;
+    var num = tableCounter;
+    var size = 40;
+    var zx = x - size/2;
+    var zy = y - size/2;
+    
+    var img = images[currentIndex];
+    img.zones.push({ table: num, x: zx, y: zy, w: size, h: size });
+    createZone(num, zx, zy, size, size);
+    
+    if (!zonesVisible) {
+        var zones = document.querySelectorAll('.zone');
+        for (var i = 0; i < zones.length; i++) {
+            if (parseInt(zones[i].dataset.table) === num) {
+                zones[i].classList.add('hidden');
+            }
+        }
+    }
+    
+    renderTableGrid();
+    logMsg('✅ Добавлен стол №' + num);
+}
+
+// ============================================================
+// 6. СОЗДАНИЕ ЗОНЫ
+// ============================================================
+function createZone(num, x, y, w, h) {
+    var div = document.createElement('div');
+    div.className = 'zone';
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.style.width = w + 'px';
+    div.style.height = h + 'px';
+    div.dataset.table = num;
+    
+    var label = document.createElement('span');
+    label.className = 'zone-label';
+    label.textContent = '№' + num;
+    div.appendChild(label);
+    
+    var del = document.createElement('button');
+    del.className = 'del-zone';
+    del.textContent = '×';
+    del.onclick = function(e) {
+        e.stopPropagation();
+        deleteTable(num);
+    };
+    div.appendChild(del);
+    
+    div.onclick = function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        selectTable(num);
+    };
+    
+    document.getElementById('map').appendChild(div);
+}
+
+// ============================================================
+// 7. УДАЛЕНИЕ СТОЛА
+// ============================================================
+function deleteTable(num) {
+    if (!confirm('Удалить стол №' + num + '?')) return;
+    
+    var img = images[currentIndex];
+    for (var i = 0; i < img.zones.length; i++) {
+        if (img.zones[i].table === num) {
+            img.zones.splice(i, 1);
+            break;
+        }
+    }
+    
+    var zones = document.querySelectorAll('.zone');
+    for (var i = 0; i < zones.length; i++) {
+        if (parseInt(zones[i].dataset.table) === num) {
+            zones[i].remove();
+        }
+    }
+    
+    if (selectedTable === num) {
+        selectedTable = null;
+        document.getElementById('deviceList').innerHTML = '<p style="color:#999;">Выберите стол</p>';
+    }
+    
+    renderTableGrid();
+    logMsg('🗑️ Стол №' + num + ' удалён');
+}
+
+// ============================================================
+// 8. ВЫБОР СТОЛА
+// ============================================================
+function selectTable(num) {
+    selectedTable = num;
+    
+    document.querySelectorAll('.zone').forEach(function(el) {
+        el.classList.remove('active');
+        if (parseInt(el.dataset.table) === num) el.classList.add('active');
+    });
+    
+    document.querySelectorAll('.table-badge').forEach(function(el) {
+        el.classList.remove('active');
+        if (parseInt(el.textContent) === num) el.classList.add('active');
+    });
+    
+    // Тестовые устройства
+    var items = [];
+    var types = ['Монитор', 'Системный блок', 'Ноутбук'];
+    var names = ['Иванов', 'Петров', 'Сидоров'];
+    for (var i = 0; i < 2 + Math.floor(Math.random() * 2); i++) {
+        items.push({
+            id: 'IT-' + types[i % 3].substring(0,3).toUpperCase() + '-' + String(num).padStart(3,'0') + (i+1),
+            type: types[i % 3],
+            sn: 'SN' + String(Math.random()).substring(2,8).toUpperCase(),
+            person: names[Math.floor(Math.random() * names.length)],
+            table: num
+        });
+    }
+    
+    renderDevices(items, num);
+    logMsg('📍 Выбран стол №' + num);
+}
+
+// ============================================================
+// 9. ОТОБРАЖЕНИЕ УСТРОЙСТВ
+// ============================================================
+function renderDevices(items, num) {
+    var container = document.getElementById('deviceList');
+    if (!items || items.length === 0) {
+        container.innerHTML = '<p style="color:#999;">📍 Стол №' + num + ' — нет оборудования</p>';
+        return;
+    }
+    var html = '<div class="table-header"><span>📍 Стол №' + num + '</span><span>Всего: ' + items.length + '</span></div>';
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        html += '<div class="device-item"><b>' + item.id + '</b> — ' + item.type + ' (SN: ' + item.sn + ') 👤 ' + item.person + '</div>';
+    }
+    container.innerHTML = html;
+}
+
+// ============================================================
+// 10. СЕТКА СТОЛОВ
+// ============================================================
+function renderTableGrid() {
+    if (currentIndex < 0 || currentIndex >= images.length) {
+        document.getElementById('tableGrid').innerHTML = '';
+        return;
+    }
+    var img = images[currentIndex];
+    var html = '';
+    for (var i = 0; i < img.zones.length; i++) {
+        var z = img.zones[i];
+        var hidden = zonesVisible ? '' : ' hidden-badge';
+        html += '<div class="table-badge' + hidden + '" onclick="selectTable(' + z.table + ')">';
+        html += z.table;
+        html += '<button class="del-badge" onclick="event.stopPropagation();deleteTable(' + z.table + ')">×</button>';
+        html += '</div>';
+    }
+    document.getElementById('tableGrid').innerHTML = html;
+}
+
+// ============================================================
+// 11. ПОКАЗАТЬ / СКРЫТЬ
+// ============================================================
+function showAll() {
     zonesVisible = true;
     document.querySelectorAll('.zone').forEach(function(el) {
         el.classList.remove('hidden');
@@ -259,10 +413,10 @@ document.getElementById('showAllBtn').addEventListener('click', function() {
     document.querySelectorAll('.table-badge').forEach(function(el) {
         el.classList.remove('hidden-badge');
     });
-    log.innerHTML = '👁️ Все выделения показаны';
-});
+    logMsg('👁️ Все выделения показаны');
+}
 
-document.getElementById('hideAllBtn').addEventListener('click', function() {
+function hideAll() {
     zonesVisible = false;
     document.querySelectorAll('.zone').forEach(function(el) {
         el.classList.add('hidden');
@@ -270,7 +424,11 @@ document.getElementById('hideAllBtn').addEventListener('click', function() {
     document.querySelectorAll('.table-badge').forEach(function(el) {
         el.classList.add('hidden-badge');
     });
-    // Снимаем выделение со стола
+    deselectAll();
+    logMsg('🙈 Все выделения скрыты');
+}
+
+function deselectAll() {
     selectedTable = null;
     document.querySelectorAll('.zone').forEach(function(el) {
         el.classList.remove('active');
@@ -278,207 +436,37 @@ document.getElementById('hideAllBtn').addEventListener('click', function() {
     document.querySelectorAll('.table-badge').forEach(function(el) {
         el.classList.remove('active');
     });
-    deviceList.innerHTML = '<p style="color:#999;">Выберите стол</p>';
-    log.innerHTML = '🙈 Все выделения скрыты';
-});
-
-// ============================================================
-// 6. РИСОВАНИЕ СТОЛОВ
-// ============================================================
-document.getElementById('drawModeBtn').addEventListener('click', function() {
-    if (currentImageIndex < 0 || images.length === 0) {
-        alert('Сначала загрузите картинку!');
-        return;
-    }
-    drawMode = !drawMode;
-    this.textContent = drawMode ? '❌ Отменить рисование' : '✏️ Рисовать столы';
-    document.getElementById('finishDrawBtn').style.display = drawMode ? 'inline-block' : 'none';
-    map.style.cursor = drawMode ? 'crosshair' : 'default';
-    log.innerHTML = drawMode ? '✏️ Режим рисования: нажмите на карте и растяните прямоугольник' : '⏹ Режим рисования выключен';
-});
-
-document.getElementById('finishDrawBtn').addEventListener('click', function() {
-    drawMode = false;
-    document.getElementById('drawModeBtn').textContent = '✏️ Рисовать столы';
-    this.style.display = 'none';
-    map.style.cursor = 'default';
-    log.innerHTML = '✅ Рисование завершено. Столов: ' + (images[currentImageIndex]?.zones?.length || 0);
-});
-
-// Рисование на карте
-map.addEventListener('mousedown', function(e) {
-    if (!drawMode) return;
-    if (e.target.tagName === 'IMG') {
-        var rect = map.getBoundingClientRect();
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
-        isDrawing = true;
-        
-        currentRect = document.createElement('div');
-        currentRect.style.position = 'absolute';
-        currentRect.style.border = '2px dashed red';
-        currentRect.style.background = 'rgba(255,0,0,0.1)';
-        currentRect.style.pointerEvents = 'none';
-        currentRect.style.left = startX + 'px';
-        currentRect.style.top = startY + 'px';
-        currentRect.style.width = '0px';
-        currentRect.style.height = '0px';
-        map.appendChild(currentRect);
-    }
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (!isDrawing || !currentRect) return;
-    var rect = map.getBoundingClientRect();
-    var currentX = e.clientX - rect.left;
-    var currentY = e.clientY - rect.top;
-    
-    var x = Math.min(startX, currentX);
-    var y = Math.min(startY, currentY);
-    var w = Math.abs(currentX - startX);
-    var h = Math.abs(currentY - startY);
-    
-    currentRect.style.left = x + 'px';
-    currentRect.style.top = y + 'px';
-    currentRect.style.width = w + 'px';
-    currentRect.style.height = h + 'px';
-});
-
-document.addEventListener('mouseup', function(e) {
-    if (!isDrawing || !currentRect) return;
-    
-    var rect = map.getBoundingClientRect();
-    var currentX = e.clientX - rect.left;
-    var currentY = e.clientY - rect.top;
-    
-    var x = Math.min(startX, currentX);
-    var y = Math.min(startY, currentY);
-    var w = Math.abs(currentX - startX);
-    var h = Math.abs(currentY - startY);
-    
-    if (w > 20 && h > 20) {
-        tableCounter++;
-        var tableNum = tableCounter;
-        
-        var img = images[currentImageIndex];
-        img.zones.push({ table: tableNum, x: x, y: y, w: w, h: h });
-        
-        createZoneElement(tableNum, x, y, w, h);
-        
-        // Если зоны скрыты, скрываем новую
-        if (!zonesVisible) {
-            var zones = map.querySelectorAll('.zone');
-            for (var i = 0; i < zones.length; i++) {
-                if (parseInt(zones[i].dataset.table) === tableNum) {
-                    zones[i].classList.add('hidden');
-                }
-            }
-        }
-        
-        log.innerHTML = '✅ Добавлен стол №' + tableNum;
-        renderTableGrid();
-    } else {
-        log.innerHTML = '⚠️ Слишком маленькая область';
-    }
-    
-    currentRect.remove();
-    currentRect = null;
-    isDrawing = false;
-});
-
-// ============================================================
-// 7. СОЗДАНИЕ ЗОНЫ
-// ============================================================
-function createZoneElement(tableNum, x, y, w, h) {
-    var div = document.createElement('div');
-    div.className = 'zone';
-    div.style.left = x + 'px';
-    div.style.top = y + 'px';
-    div.style.width = w + 'px';
-    div.style.height = h + 'px';
-    div.dataset.table = tableNum;
-    
-    var label = document.createElement('span');
-    label.className = 'zone-label';
-    label.textContent = '№' + tableNum;
-    div.appendChild(label);
-    
-    var delBtn = document.createElement('button');
-    delBtn.className = 'delete-zone-btn';
-    delBtn.textContent = '×';
-    delBtn.title = 'Удалить стол';
-    delBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        deleteTable(tableNum);
-    });
-    div.appendChild(delBtn);
-    
-    div.addEventListener('click', function(e) {
-        if (e.target.classList.contains('delete-zone-btn')) return;
-        e.stopPropagation();
-        selectTable(tableNum);
-    });
-    
-    map.appendChild(div);
+    document.getElementById('deviceList').innerHTML = '<p style="color:#999;">Выберите стол</p>';
+    logMsg('🔽 Выделение снято');
 }
 
 // ============================================================
-// 8. УДАЛЕНИЕ СТОЛА
+// 12. СБРОС
 // ============================================================
-function deleteTable(tableNum) {
-    if (!confirm('Удалить стол №' + tableNum + '?')) return;
-    
-    var img = images[currentImageIndex];
-    if (!img) return;
-    
-    var index = -1;
-    for (var i = 0; i < img.zones.length; i++) {
-        if (img.zones[i].table === tableNum) {
-            index = i;
-            break;
-        }
-    }
-    if (index >= 0) {
-        img.zones.splice(index, 1);
-    }
-    
-    var elements = map.querySelectorAll('.zone');
-    for (var j = 0; j < elements.length; j++) {
-        if (parseInt(elements[j].dataset.table) === tableNum) {
-            elements[j].remove();
-        }
-    }
-    
-    if (selectedTable === tableNum) {
-        selectedTable = null;
-        deviceList.innerHTML = '<p style="color:#999;">Выберите стол</p>';
-    }
-    
-    renderTableGrid();
-    log.innerHTML = '🗑️ Стол №' + tableNum + ' удалён';
+function clearAll() {
+    if (!confirm('Удалить всё?')) return;
+    images = [];
+    currentIndex = -1;
+    tableCounter = 0;
+    document.getElementById('map').innerHTML = '<div class="placeholder">Загрузите картинку</div>';
+    document.getElementById('image-list').innerHTML = '';
+    document.getElementById('tableGrid').innerHTML = '';
+    document.getElementById('deviceList').innerHTML = '';
+    logMsg('🗑️ Всё очищено');
 }
 
 // ============================================================
-// 9. СНЯТЬ ВЫДЕЛЕНИЕ
+// 13. ЛОГ
 // ============================================================
-document.getElementById('deselectBtn').addEventListener('click', function() {
-    selectedTable = null;
-    document.querySelectorAll('.zone').forEach(function(el) {
-        el.classList.remove('active');
-    });
-    document.querySelectorAll('.table-badge').forEach(function(el) {
-        el.classList.remove('active');
-    });
-    deviceList.innerHTML = '<p style="color:#999;">Выберите стол</p>';
-    log.innerHTML = '🔽 Выделение снято';
-});
+function logMsg(msg) {
+    document.getElementById('log').innerHTML = msg;
+}
 
 // ============================================================
-// 10. ВЫБОР СТОЛА
+// 14. ЗАПУСК
 // ============================================================
-function selectTable(tableNum) {
-    selectedTable = tableNum;
-    
-    document.querySelectorAll('.zone').forEach(function(el) {
-        el.classList.remove('active');
-        if (parseInt(el.datas (...)
+logMsg('✅ Готово! Загрузите картинку, включите режим рисования и кликайте на карте.');
+console.log('✅ Инвентаризация запущена!');
+</script>
+</body>
+</html>
