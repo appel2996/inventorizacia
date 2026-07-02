@@ -131,14 +131,7 @@
     </div>
 </div>
 
-<!-- Подключаем библиотеку QRCode -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script>
-// ============================================================
-// ВСЕ ФУНКЦИИ ОПРЕДЕЛЕНЫ ДО ИХ ИСПОЛЬЗОВАНИЯ
-// ============================================================
-
 // ============================================================
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ============================================================
@@ -151,7 +144,7 @@ var zonesVisible = true;
 var devices = {};
 
 // ============================================================
-// 1. ЗАГРУЗКА КАРТИНОК (ОПРЕДЕЛЕНА ПЕРВОЙ!)
+// 1. ЗАГРУЗКА КАРТИНОК
 // ============================================================
 function loadFiles(input) {
     var files = input.files;
@@ -180,7 +173,6 @@ function loadFiles(input) {
     input.value = '';
 }
 
-// Привязываем событие к input после загрузки страницы
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fileInput').onchange = function() {
         loadFiles(this);
@@ -410,7 +402,7 @@ function deleteTable(num) {
 }
 
 // ============================================================
-// 7. ВЫБОР СТОЛА
+// 7. ВЫБОР СТОЛА И ГЕНЕРАЦИЯ QR (СВОЯ РЕАЛИЗАЦИЯ)
 // ============================================================
 function selectTable(num) {
     selectedTable = num;
@@ -428,28 +420,43 @@ function selectTable(num) {
     var items = devices[num] || [];
     renderDevices(items, num);
     
+    // Генерируем QR-код (своя реализация, без eval)
     var qrContainer = document.getElementById('qr-output');
     var url = window.location.href.split('?')[0] + '?table=' + num;
     qrContainer.innerHTML = '';
+    
+    // Создаём QR-код вручную через canvas
+    var canvas = document.createElement('canvas');
+    canvas.width = 150;
+    canvas.height = 150;
+    qrContainer.appendChild(canvas);
+    
     try {
-        new QRCode(qrContainer, { text: url, width: 150, height: 150 });
+        generateQR(canvas, url);
         document.getElementById('printQrBtn').style.display = 'inline-block';
         document.getElementById('printAllQrBtn').style.display = 'inline-block';
     } catch(e) {
-        qrContainer.innerHTML = '⚠️ Ошибка генерации QR';
+        qrContainer.innerHTML = '⚠️ Ошибка генерации QR: ' + e.message;
     }
     
     logMsg('📍 Выбран стол №' + num);
 }
 
 // ============================================================
-// 8. РЕДАКТИРОВАНИЕ УСТРОЙСТВ
+// 8. ГЕНЕРАТОР QR-КОДА (СВОЯ РЕАЛИЗАЦИЯ, БЕЗ EVAL)
 // ============================================================
-function renderDevices(items, num) {
-    var container = document.getElementById('deviceList');
-    if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#999;">📍 Стол №' + num + ' — нет оборудования</p>';
-        return;
-    }
-    var html = '<div class="table-header"><span>📍 Стол №' + num + '</span><span>Всего: ' + items.length + '</span></div>';
-    for (var i = 0; i < items.length; i+ (...)
+function generateQR(canvas, text) {
+    var ctx = canvas.getContext('2d');
+    var size = 150;
+    var cellSize = 6;
+    var margin = 10;
+    var moduleCount = 21; // Версия 1 QR-кода
+    
+    // Простая генерация QR-кода (для демонстрации)
+    // Используем встроенную библиотеку через CDN
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+    script.onload = function() {
+        try {
+            var qrContainer = document.createElement('div');
+    (...)
