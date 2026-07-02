@@ -91,19 +91,19 @@
         <h1>🗺️ Инвентаризация</h1>
         
         <div class="flex">
-            <button class="btn btn-yellow" id="loadBtn">📂 Загрузить</button>
-            <button class="btn btn-purple" id="drawBtn">✏️ Рисовать</button>
-            <button class="btn btn-green" id="finishBtn" style="display:none;">✅ Готово</button>
-            <button class="btn btn-orange" id="deselectBtn">🔽 Снять</button>
-            <button class="btn btn-teal" id="showAllBtn">👁️ Показать</button>
-            <button class="btn btn-pink" id="hideAllBtn">🙈 Скрыть</button>
-            <button class="btn btn-red" id="clearBtn">🗑️ Очистить</button>
-            <input type="file" id="fileInput" accept="image/*" multiple>
+            <button class="btn btn-yellow" onclick="openFileDialog()">📂 Загрузить</button>
+            <button class="btn btn-purple" onclick="toggleDrawMode()">✏️ Рисовать</button>
+            <button class="btn btn-green" id="finishBtn" style="display:none;" onclick="finishDrawMode()">✅ Готово</button>
+            <button class="btn btn-orange" onclick="deselectAll()">🔽 Снять</button>
+            <button class="btn btn-teal" onclick="showAll()">👁️ Показать</button>
+            <button class="btn btn-pink" onclick="hideAll()">🙈 Скрыть</button>
+            <button class="btn btn-red" onclick="clearAll()">🗑️ Очистить</button>
+            <input type="file" id="fileInput" accept="image/*" multiple onchange="loadFiles(this)">
         </div>
         
         <div id="image-list"></div>
         
-        <div id="map">
+        <div id="map" onclick="handleMapClick(event)">
             <div class="placeholder">Загрузите картинку</div>
         </div>
         
@@ -114,7 +114,7 @@
     <div class="panel right">
         <h2>📋 Информация</h2>
         
-        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола...">
+        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола..." oninput="searchTables(this.value)">
         
         <div class="table-grid" id="tableGrid"></div>
         
@@ -126,8 +126,8 @@
                 <span class="qr-placeholder">Выберите стол</span>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn" id="printQrBtn" style="display:none;">🖨️ Печать QR</button>
-                <button class="btn btn-green" id="printAllQrBtn" style="display:none;">📦 Печать всех QR</button>
+                <button class="btn" id="printQrBtn" style="display:none;" onclick="printQR()">🖨️ Печать QR</button>
+                <button class="btn btn-green" id="printAllQrBtn" style="display:none;" onclick="printAllQR()">📦 Печать всех QR</button>
             </div>
         </div>
     </div>
@@ -135,9 +135,8 @@
 
 <script>
 // ============================================================
-// ВСЕ ФУНКЦИИ ОБЪЯВЛЕНЫ ЗДЕСЬ (ДО ИХ ВЫЗОВА)
+// ВСЕ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ============================================================
-
 var images = [];
 var currentIndex = -1;
 var drawMode = false;
@@ -156,6 +155,10 @@ function logMsg(msg) {
 // ============================================================
 // 2. ЗАГРУЗКА КАРТИНОК
 // ============================================================
+function openFileDialog() {
+    document.getElementById('fileInput').click();
+}
+
 function loadFiles(input) {
     var files = input.files;
     if (!files || files.length === 0) return;
@@ -191,30 +194,14 @@ function renderImages() {
     for (var i = 0; i < images.length; i++) {
         var img = images[i];
         var active = (i === currentIndex) ? ' active' : '';
-        html += '<div class="image-item' + active + '" data-index="' + i + '">';
+        html += '<div class="image-item' + active + '" onclick="showImage(' + i + ')">';
         html += '<img src="' + img.data + '" />';
         html += '<div class="name">' + img.name + '</div>';
         html += '<div class="zone-count">Столов: ' + img.zones.length + '</div>';
-        html += '<button class="del-btn" data-index="' + i + '">×</button>';
+        html += '<button class="del-btn" onclick="event.stopPropagation();deleteImage(' + i + ')">×</button>';
         html += '</div>';
     }
     document.getElementById('image-list').innerHTML = html;
-    
-    // Привязываем события
-    document.querySelectorAll('.image-item').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            if (e.target.classList.contains('del-btn')) return;
-            showImage(index);
-        });
-    });
-    document.querySelectorAll('.del-btn').forEach(function(el) {
-        var index = parseInt(el.dataset.index);
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            deleteImage(index);
-        });
-    });
 }
 
 function deleteImage(index) {
@@ -278,7 +265,81 @@ function showImage(index) {
 }
 
 // ============================================================
-// 5. СОЗДАНИЕ ЗОНЫ
+// 5. РИСОВАНИЕ СТОЛОВ
+// ============================================================
+function toggleDrawMode() {
+    if (currentIndex < 0 || images.length === 0) {
+        alert('Сначала загрузите картинку!');
+        return;
+    }
+    drawMode = !drawMode;
+    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
+    btn.textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать';
+    document.getElementById('finishBtn').style.display = drawMode ? 'inline-block' : 'none';
+    document.getElementById('map').style.cursor = drawMode ? 'crosshair' : 'default';
+    logMsg(drawMode ? '✏️ Режим рисования — кликните на карте' : '⏹ Режим выключен');
+}
+
+function finishDrawMode() {
+    drawMode = false;
+    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
+    btn.textContent = '✏️ Рисовать';
+    document.getElementById('finishBtn').style.display = 'none';
+    document.getElementById('map').style.cursor = 'default';
+    logMsg('✅ Рисование завершено');
+}
+
+// Клик по карте
+function handleMapClick(e) {
+    if (!drawMode) return;
+    var target = e.target;
+    if (target.tagName !== 'IMG') return;
+    
+    var rect = document.getElementById('map').getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var y = e.clientY - rect.top;
+    
+    tableCounter++;
+    var num = tableCounter;
+    var size = 30;
+    var zx = x - size/2;
+    var zy = y - size/2;
+    
+    var img = images[currentIndex];
+    img.zones.push({ table: num, x: zx, y: zy, w: size, h: size });
+    createZone(num, zx, zy, size, size);
+    
+    if (!devices[num]) {
+        devices[num] = [];
+        var types = ['Монитор', 'Системный блок', 'Ноутбук'];
+        var names = ['Иванов', 'Петров', 'Сидоров'];
+        var count = 2 + Math.floor(Math.random() * 2);
+        for (var i = 0; i < count; i++) {
+            var type = types[i % types.length];
+            devices[num].push({
+                id: 'IT-' + type.substring(0,3).toUpperCase() + '-' + String(num).padStart(3,'0') + (i+1),
+                type: type,
+                sn: 'SN' + String(Math.random()).substring(2,8).toUpperCase(),
+                person: names[Math.floor(Math.random() * names.length)]
+            });
+        }
+    }
+    
+    if (!zonesVisible) {
+        var zones = document.querySelectorAll('.zone');
+        for (var i = 0; i < zones.length; i++) {
+            if (parseInt(zones[i].dataset.table) === num) {
+                zones[i].classList.add('hidden');
+            }
+        }
+    }
+    
+    renderTableGrid();
+    logMsg('✅ Добавлен стол №' + num);
+}
+
+// ============================================================
+// 6. СОЗДАНИЕ ЗОНЫ
 // ============================================================
 function createZone(num, x, y, w, h) {
     var div = document.createElement('div');
@@ -297,22 +358,22 @@ function createZone(num, x, y, w, h) {
     var del = document.createElement('button');
     del.className = 'del-zone';
     del.textContent = '×';
-    del.addEventListener('click', function(e) {
+    del.onclick = function(e) {
         e.stopPropagation();
         deleteTable(num);
-    });
+    };
     div.appendChild(del);
     
-    div.addEventListener('click', function(e) {
+    div.onclick = function(e) {
         if (e.target.tagName === 'BUTTON') return;
         selectTable(num);
-    });
+    };
     
     document.getElementById('map').appendChild(div);
 }
 
 // ============================================================
-// 6. УДАЛЕНИЕ СТОЛА
+// 7. УДАЛЕНИЕ СТОЛА
 // ============================================================
 function deleteTable(num) {
     if (!confirm('Удалить стол №' + num + '?')) return;
@@ -346,7 +407,7 @@ function deleteTable(num) {
 }
 
 // ============================================================
-// 7. ВЫБОР СТОЛА
+// 8. ВЫБОР СТОЛА
 // ============================================================
 function selectTable(num) {
     selectedTable = num;
@@ -393,57 +454,6 @@ function selectTable(num) {
 }
 
 // ============================================================
-// 8. УСТРОЙСТВА
+// 9. УСТРОЙСТВА
 // ============================================================
-function renderDevices(items, num) {
-    var container = document.getElementById('deviceList');
-    if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#999;">📍 Стол №' + num + ' — нет оборудования</p>';
-        return;
-    }
-    var html = '<div class="table-header"><span>📍 Стол №' + num + '</span><span>Всего: ' + items.length + '</span></div>';
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        html += '<div class="device-item">';
-        html += '<span class="dev-id">' + item.id + '</span>';
-        html += '<input class="dev-type" value="' + item.type + '" data-table="' + num + '" data-index="' + i + '" data-field="type" placeholder="Тип">';
-        html += '<input class="dev-person" value="' + (item.person || '') + '" data-table="' + num + '" data-index="' + i + '" data-field="person" placeholder="Ответственный">';
-        html += '<span class="dev-actions">';
-        html += '<button class="btn btn-red btn-sm" data-table="' + num + '" data-index="' + i + '">🗑️</button>';
-        html += '</span>';
-        html += '</div>';
-    }
-    container.innerHTML = html;
-    
-    // Привязываем события для редактирования
-    container.querySelectorAll('input').forEach(function(el) {
-        el.addEventListener('change', function() {
-            var tableNum = parseInt(this.dataset.table);
-            var index = parseInt(this.dataset.index);
-            var field = this.dataset.field;
-            var value = this.value;
-            if (devices[tableNum] && devices[tableNum][index]) {
-                devices[tableNum][index][field] = value;
-                logMsg('✅ Обновлено устройство');
-            }
-        });
-    });
-    
-    container.querySelectorAll('.btn-red').forEach(function(el) {
-        el.addEventListener('click', function() {
-            var tableNum = parseInt(this.dataset.table);
-            var index = parseInt(this.dataset.index);
-            if (!confirm('Удалить устройство?')) return;
-            if (!devices[tableNum]) return;
-            devices[tableNum].splice(index, 1);
-            if (devices[tableNum].length === 0) {
-                delete devices[tableNum];
-            }
-            selectTable(tableNum);
-            logMsg('🗑️ Устройство удалено');
-        });
-    });
-}
-
-function addDevice(tableNum) {
-    if (!devices[tableN (...)
+function  (...)
