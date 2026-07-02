@@ -77,39 +77,40 @@
     <div class="panel left">
         <h1>🗺️ Инвентаризация</h1>
         <div class="flex">
-            <button class="btn btn-yellow" onclick="openFileDialog()">📂 Загрузить</button>
-            <button class="btn btn-purple" onclick="toggleDrawMode()">✏️ Рисовать</button>
-            <button class="btn btn-green" id="finishBtn" style="display:none;" onclick="finishDrawMode()">✅ Готово</button>
-            <button class="btn btn-orange" onclick="deselectAll()">🔽 Снять</button>
-            <button class="btn btn-teal" onclick="showAll()">👁️ Показать</button>
-            <button class="btn btn-pink" onclick="hideAll()">🙈 Скрыть</button>
-            <button class="btn btn-red" onclick="clearAll()">🗑️ Очистить</button>
+            <button class="btn btn-yellow" id="loadBtn">📂 Загрузить</button>
+            <button class="btn btn-purple" id="drawBtn">✏️ Рисовать</button>
+            <button class="btn btn-green" id="finishBtn" style="display:none;">✅ Готово</button>
+            <button class="btn btn-orange" id="deselectBtn">🔽 Снять</button>
+            <button class="btn btn-teal" id="showAllBtn">👁️ Показать</button>
+            <button class="btn btn-pink" id="hideAllBtn">🙈 Скрыть</button>
+            <button class="btn btn-red" id="clearBtn">🗑️ Очистить</button>
             <input type="file" id="fileInput" accept="image/*" multiple>
         </div>
         <div id="image-list"></div>
-        <div id="map" onclick="handleMapClick(event)">
+        <div id="map">
             <div class="placeholder">Загрузите картинку</div>
         </div>
         <div class="log" id="log">Ожидание действий...</div>
     </div>
     <div class="panel right">
         <h2>📋 Информация</h2>
-        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола..." oninput="searchTables(this.value)">
+        <input class="search-box" id="searchInput" placeholder="🔍 Поиск по номеру стола...">
         <div class="table-grid" id="tableGrid"></div>
         <div id="deviceList"><p style="color:#999;">Выберите стол на карте</p></div>
         <div class="qr-section">
             <h4>🏷️ QR-код стола</h4>
             <div id="qr-output"><span class="qr-placeholder">Выберите стол</span></div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn" id="printQrBtn" style="display:none;" onclick="printQR()">🖨️ Печать QR</button>
-                <button class="btn btn-green" id="printAllQrBtn" style="display:none;" onclick="printAllQR()">📦 Печать всех QR</button>
+                <button class="btn" id="printQrBtn" style="display:none;">🖨️ Печать QR</button>
+                <button class="btn btn-green" id="printAllQrBtn" style="display:none;">📦 Печать всех QR</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// ВСЕ ФУНКЦИИ ОБЪЯВЛЕНЫ ЗДЕСЬ
+// ============================================================
+// ВСЕ ДАННЫЕ
 // ============================================================
 var images = [];
 var currentIndex = -1;
@@ -120,19 +121,15 @@ var zonesVisible = true;
 var devices = {};
 
 // ============================================================
-// ЛОГ
+// 1. ЛОГ
 // ============================================================
 function logMsg(msg) {
     document.getElementById('log').innerHTML = msg;
 }
 
 // ============================================================
-// ЗАГРУЗКА
+// 2. ЗАГРУЗКА КАРТИНОК
 // ============================================================
-function openFileDialog() {
-    document.getElementById('fileInput').click();
-}
-
 function loadFiles(input) {
     var files = input.files;
     if (!files || files.length === 0) return;
@@ -160,27 +157,34 @@ function loadFiles(input) {
     input.value = '';
 }
 
-// Привязываем событие загрузки
-document.getElementById('fileInput').onchange = function() {
-    loadFiles(this);
-};
-
 // ============================================================
-// КАРТИНКИ
+// 3. КАРТИНКИ
 // ============================================================
 function renderImages() {
     var html = '';
     for (var i = 0; i < images.length; i++) {
         var img = images[i];
         var active = (i === currentIndex) ? ' active' : '';
-        html += '<div class="image-item' + active + '" onclick="showImage(' + i + ')">';
+        html += '<div class="image-item' + active + '" data-index="' + i + '">';
         html += '<img src="' + img.data + '" />';
         html += '<div class="name">' + img.name + '</div>';
         html += '<div class="zone-count">Столов: ' + img.zones.length + '</div>';
-        html += '<button class="del-btn" onclick="event.stopPropagation();deleteImage(' + i + ')">×</button>';
+        html += '<button class="del-btn" data-index="' + i + '">×</button>';
         html += '</div>';
     }
     document.getElementById('image-list').innerHTML = html;
+    
+    document.querySelectorAll('.image-item').forEach(function(el) {
+        var index = parseInt(el.dataset.index);
+        el.onclick = function() { showImage(index); };
+    });
+    document.querySelectorAll('.del-btn').forEach(function(el) {
+        var index = parseInt(el.dataset.index);
+        el.onclick = function(e) {
+            e.stopPropagation();
+            deleteImage(index);
+        };
+    });
 }
 
 function deleteImage(index) {
@@ -241,7 +245,7 @@ function showImage(index) {
 }
 
 // ============================================================
-// РИСОВАНИЕ
+// 4. РИСОВАНИЕ
 // ============================================================
 function toggleDrawMode() {
     if (currentIndex < 0 || images.length === 0) {
@@ -249,8 +253,7 @@ function toggleDrawMode() {
         return;
     }
     drawMode = !drawMode;
-    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
-    btn.textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать';
+    document.getElementById('drawBtn').textContent = drawMode ? '❌ Отменить' : '✏️ Рисовать';
     document.getElementById('finishBtn').style.display = drawMode ? 'inline-block' : 'none';
     document.getElementById('map').style.cursor = drawMode ? 'crosshair' : 'default';
     logMsg(drawMode ? '✏️ Режим рисования — кликните на карте' : '⏹ Режим выключен');
@@ -258,8 +261,7 @@ function toggleDrawMode() {
 
 function finishDrawMode() {
     drawMode = false;
-    var btn = document.querySelector('[onclick="toggleDrawMode()"]');
-    btn.textContent = '✏️ Рисовать';
+    document.getElementById('drawBtn').textContent = '✏️ Рисовать';
     document.getElementById('finishBtn').style.display = 'none';
     document.getElementById('map').style.cursor = 'default';
     logMsg('✅ Рисование завершено');
@@ -310,7 +312,7 @@ function handleMapClick(e) {
 }
 
 // ============================================================
-// ЗОНЫ
+// 5. ЗОНЫ
 // ============================================================
 function createZone(num, x, y, w, h) {
     var div = document.createElement('div');
@@ -372,7 +374,7 @@ function deleteTable(num) {
 }
 
 // ============================================================
-// ВЫБОР СТОЛА
+// 6. ВЫБОР СТОЛА
 // ============================================================
 function selectTable(num) {
     selectedTable = num;
@@ -416,7 +418,7 @@ function selectTable(num) {
 }
 
 // ============================================================
-// УСТРОЙСТВА
+// 7. УСТРОЙСТВА
 // ============================================================
 function renderDevices(items, num) {
     var container = document.getElementById('deviceList');
@@ -429,7 +431,7 @@ function renderDevices(items, num) {
         var item = items[i];
         html += '<div class="device-item">';
         html += '<span class="dev-id">' + item.id + '</span>';
-        html += '<input class="dev-type" value="' + item.type + '" onchange="updateDevice(' + num + ',' + i + ',\'type\',this.value)" placeholder="Тип">';
-        html += '<input class="dev-person" value="' + (item.person || '') + '" onchange="updateDevice(' + num + ',' + i + ',\'person\',this.value)" placeholder="Ответственный">';
+        html += '<input class="dev-type" value="' + item.type + '" data-table="' + num + '" data-index="' + i + '" data-field="type" placeholder="Тип">';
+        html += '<input class="dev-person" value="' + (item.person || '') + '" data-table="' + num + '" data-index="' + i + '" data-field="person" placeholder="Ответственный">';
         html += '<span class="dev-actions">';
-        html += '<button clas (...)
+        html += '<button class="btn btn-red  (...)
