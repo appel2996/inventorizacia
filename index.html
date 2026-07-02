@@ -1,494 +1,96 @@
+html
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Инвентаризация 136 столов</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <title>Инвентаризация</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; background: #f0f2f5; margin: 0; }
-        .panel { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        #map-container { flex: 2; min-width: 600px; position: relative; }
-        #map-container img { width: 100%; height: auto; display: block; border-radius: 8px; }
-        #zones-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .zone { position: absolute; border: 2px solid rgba(0,123,255,0.5); background: rgba(0,123,255,0.1); cursor: pointer; pointer-events: auto; transition: 0.2s; }
-        .zone:hover { background: rgba(255,0,0,0.2); border-color: red; }
-        .zone.active { border-color: #ff0000; border-width: 3px; background: rgba(255,0,0,0.15); }
-        .zone-label { position: absolute; top: -18px; left: 2px; font-size: 10px; background: white; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #333; }
-        #info { flex: 1; min-width: 320px; max-height: 90vh; overflow-y: auto; }
-        .device-card { background: #f8f9fc; padding: 8px 12px; margin: 4px 0; border-left: 4px solid #007bff; border-radius: 4px; font-size: 13px; }
-        .device-card.found { border-left-color: #28a745; background: #e6f9ed; }
-        .btn { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 4px 0; }
-        .btn-danger { background: #dc3545; }
-        .btn-success { background: #28a745; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 5px 0; }
-        input, select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; width: 100%; }
-        #scanner-box { border: 2px dashed #aaa; padding: 10px; border-radius: 8px; text-align: center; min-height: 80px; }
-        #scanner-box video { width: 100% !important; max-height: 200px; }
-        #qr-output { text-align: center; padding: 10px; min-height: 160px; }
-        #qr-output canvas { margin: 0 auto; }
-        .stats { display: flex; gap: 15px; flex-wrap: wrap; font-size: 14px; }
-        .stats span { background: #e9ecef; padding: 4px 12px; border-radius: 20px; }
-        #device-list { max-height: 300px; overflow-y: auto; }
-        .table-badge { display: inline-block; background: #007bff; color: white; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; font-size: 12px; margin: 2px; cursor: pointer; }
-        .table-badge:hover { transform: scale(1.1); }
-        .table-badge.active-badge { background: #dc3545; }
-        @media (max-width: 768px) { body { flex-direction: column; } #map-container { min-width: auto; } }
+        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+        .panel { background: white; padding: 20px; border-radius: 12px; max-width: 1200px; margin: 0 auto; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        .btn-yellow { background: #ffc107; color: #333; }
+        .flex { display: flex; flex-wrap: wrap; gap: 10px; }
+        #map { width: 100%; min-height: 400px; border: 2px dashed #007bff; border-radius: 12px; margin: 10px 0; background: #f8f9fa; position: relative; overflow: hidden; }
+        #map img { width: 100%; height: auto; display: block; }
+        .log { background: #e9ecef; padding: 10px; border-radius: 6px; margin-top: 10px; }
+        .zone { position: absolute; border: 2px solid blue; background: rgba(0,0,255,0.1); cursor: pointer; }
+        .zone-label { position: absolute; top: -18px; left: 2px; font-size: 10px; background: white; padding: 0 4px; }
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-<!-- КАРТА -->
-<div id="map-container" class="panel">
-    <h3>🗺️ План помещения (136 столов)</h3>
-    <div style="position: relative; display: inline-block; width: 100%;">
-        <img id="floor-plan" src="" alt="Загрузите план" />
-        <div id="zones-container"></div>
+<div class="panel">
+    <h1>🗺️ Инвентаризация</h1>
+    <div class="flex">
+        <button class="btn btn-yellow" onclick="document.getElementById('fileInput').click()">📂 Загрузить</button>
+        <button class="btn" onclick="addTable()">➕ Добавить стол</button>
+        <button class="btn" style="background:#dc3545;color:white;" onclick="clearAll()">🗑️ Очистить</button>
+        <input type="file" id="fileInput" accept="image/*" onchange="loadImage(this)">
     </div>
-    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
-        <button class="btn" onclick="loadImage()">📂 Загрузить план</button>
-        <button class="btn btn-success" onclick="loadCSV()">📊 Загрузить CSV с данными</button>
-        <button class="btn btn-warning" onclick="autoGenerateZones()">⚡ Авто-разметка столов</button>
-        <button class="btn btn-danger" onclick="clearAll()">🗑️ Сброс</button>
-    </div>
-    <p style="font-size:12px; color:#666; margin-top:5px;">
-        💡 Данные можно править в Excel → сохранять как CSV → загружать кнопкой выше
-    </p>
-</div>
-
-<!-- ИНФОРМАЦИЯ -->
-<div id="info" class="panel">
-    <h3>📋 Инвентарь</h3>
-    <div class="stats" id="stats"></div>
-    
-    <div class="row">
-        <input type="text" id="search-input" placeholder="Поиск по ID, столу, ФИО..." style="flex:1;">
-        <button class="btn" onclick="searchDevice()">🔍</button>
-    </div>
-    
-    <div id="table-grid" style="margin: 8px 0; max-height: 80px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 4px;"></div>
-    
-    <div id="device-list"><p style="color:#999;">Выберите стол на карте или введите поиск</p></div>
-
-    <hr>
-    <h4>📸 Сканер QR</h4>
-    <div id="scanner-box">
-        <button class="btn" id="start-scan">▶ Запустить камеру</button>
-        <button class="btn btn-danger" id="stop-scan" style="display:none;">⏹ Остановить</button>
-        <div id="scanner-result" style="margin-top:8px; font-weight:bold;"></div>
-    </div>
-
-    <hr>
-    <h4>🏷️ QR для печати</h4>
-    <div id="qr-output">Выберите стол</div>
-    <button class="btn" onclick="printQR()" id="print-btn" style="display:none;">🖨️ Печать этикетки</button>
-    <button class="btn btn-success" onclick="printAllQR()" id="print-all-btn" style="display:none;">📦 Печать всех QR</button>
+    <div id="map"><div style="padding:20px;text-align:center;color:#999;">Загрузите картинку</div></div>
+    <div class="log" id="log">Готово!</div>
 </div>
 
 <script>
-// ============================================================
-// 1. ПЕРЕМЕННЫЕ
-// ============================================================
-let inventory = [];
-let zones = JSON.parse(localStorage.getItem('zones_136')) || [];
-let selectedTable = null;
-let qrInstance = null;
-let html5QrCode = null;
+var tables = [];
+var tableCounter = 0;
+var imageData = null;
 
-// ============================================================
-// 2. ЗАГРУЗКА КАРТИНКИ
-// ============================================================
-function loadImage() {
-    const url = prompt('Введите URL картинки плана (можно из Google Диска или локально):', 
-        'https://via.placeholder.com/1200x800/CCCCCC/000000?text=Ваш+план+на+136+столов');
-    if (url) {
-        document.getElementById('floor-plan').src = url;
-        document.getElementById('floor-plan').onload = () => {
-            renderZones();
-            if (zones.length === 0) autoGenerateZones();
-        };
-    }
-}
+function logMsg(msg) { document.getElementById('log').innerHTML = msg; }
 
-// ============================================================
-// 3. ЗАГРУЗКА CSV (данные из Excel/Google Таблиц)
-// ============================================================
-function loadCSV() {
-    // Вариант 1: загрузить файл с компьютера
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            parseCSV(event.target.result);
-        };
-        reader.readAsText(file, 'UTF-8');
+function loadImage(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        imageData = e.target.result;
+        var map = document.getElementById('map');
+        map.innerHTML = '<img src="' + imageData + '" />';
+        for (var i = 0; i < tables.length; i++) {
+            var t = tables[i];
+            createZone(t.num, t.x, t.y);
+        }
+        logMsg('✅ Картинка загружена! Столов: ' + tables.length);
     };
-    input.click();
-
-    // Вариант 2: если хотите по ссылке из Google Таблиц — раскомментируйте ниже
-    /*
-    const url = prompt('Вставьте ссылку на CSV (опубликованный из Google Таблиц):');
-    if (url) {
-        fetch(url)
-            .then(res => res.text())
-            .then(csv => parseCSV(csv))
-            .catch(err => alert('Ошибка загрузки: ' + err.message));
-    }
-    */
+    reader.readAsDataURL(file);
+    input.value = '';
 }
 
-function parseCSV(csv) {
-    const lines = csv.split('\n').filter(line => line.trim());
-    if (lines.length < 2) {
-        alert('❌ CSV пустой или повреждён');
-        return;
-    }
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const data = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        const obj = {};
-        headers.forEach((h, idx) => {
-            obj[h] = values[idx] || '';
-        });
-        if (obj.table) {
-            obj.table = parseInt(obj.table);
-            data.push(obj);
-        }
-    }
-    if (data.length === 0) {
-        alert('❌ Не найдено данных. Проверьте колонки: id, type, sn, person, table');
-        return;
-    }
-    inventory = data;
-    renderDeviceList([]);
-    renderTableGrid();
-    updateStats();
-    alert(`✅ Загружено ${inventory.length} устройств с ${new Set(inventory.map(i=>i.table)).size} столов`);
+function addTable() {
+    tableCounter++;
+    var num = tableCounter;
+    var map = document.getElementById('map');
+    var rect = map.getBoundingClientRect();
+    var x = 50 + Math.random() * (rect.width - 100);
+    var y = 50 + Math.random() * (rect.height - 100);
+    tables.push({ num: num, x: x, y: y });
+    createZone(num, x, y);
+    logMsg('✅ Добавлен стол №' + num);
 }
 
-// ============================================================
-// 4. АВТО-РАЗМЕТКА 136 СТОЛОВ (сетка)
-// ============================================================
-function autoGenerateZones() {
-    const img = document.getElementById('floor-plan');
-    if (!img || !img.naturalWidth) {
-        alert('Сначала загрузите картинку плана!');
-        return;
-    }
-    
-    const cols = 17;
-    const rows = 8;
-    const cellW = img.naturalWidth / (cols + 1);
-    const cellH = img.naturalHeight / (rows + 1);
-    
-    zones = [];
-    let tableNum = 1;
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (tableNum > 136) break;
-            const x = c * cellW + cellW * 0.2;
-            const y = r * cellH + cellH * 0.2;
-            const w = cellW * 0.6;
-            const h = cellH * 0.6;
-            zones.push({ table: tableNum, x, y, w, h });
-            tableNum++;
-        }
-        if (tableNum > 136) break;
-    }
-    
-    localStorage.setItem('zones_136', JSON.stringify(zones));
-    renderZones();
-    renderTableGrid();
-    updateStats();
-    alert(`✅ Создано ${zones.length} зон для столов`);
-}
-
-// ============================================================
-// 5. РЕНДЕР ЗОН
-// ============================================================
-function renderZones() {
-    const container = document.getElementById('zones-container');
-    container.innerHTML = '';
-    const img = document.getElementById('floor-plan');
-    if (!img || !img.naturalWidth || zones.length === 0) return;
-
-    const rect = img.getBoundingClientRect();
-    const scaleX = img.naturalWidth / rect.width;
-    const scaleY = img.naturalHeight / rect.height;
-
-    zones.forEach(zone => {
-        const div = document.createElement('div');
-        div.className = 'zone';
-        div.style.left = (zone.x / scaleX) + '%';
-        div.style.top = (zone.y / scaleY) + '%';
-        div.style.width = (zone.w / scaleX) + '%';
-        div.style.height = (zone.h / scaleY) + '%';
-        div.dataset.table = zone.table;
-        div.title = `Стол №${zone.table}`;
-        
-        const label = document.createElement('span');
-        label.className = 'zone-label';
-        label.textContent = `№${zone.table}`;
-        div.appendChild(label);
-        
-        div.onclick = (e) => {
-            e.stopPropagation();
-            selectTable(zone.table);
-        };
-        container.appendChild(div);
-    });
-}
-
-// ============================================================
-// 6. СЕТКА СТОЛОВ
-// ============================================================
-function renderTableGrid() {
-    const grid = document.getElementById('table-grid');
-    grid.innerHTML = '';
-    const uniqueTables = [...new Set(inventory.map(i => i.table))].sort((a,b) => a-b);
-    uniqueTables.forEach(t => {
-        const badge = document.createElement('span');
-        badge.className = 'table-badge';
-        badge.textContent = t;
-        badge.title = `Стол №${t}`;
-        badge.onclick = () => selectTable(t);
-        grid.appendChild(badge);
-    });
-    if (uniqueTables.length === 0) {
-        grid.innerHTML = '<span style="color:#999; font-size:12px;">Нет данных</span>';
-    }
-}
-
-// ============================================================
-// 7. ВЫБОР СТОЛА
-// ============================================================
-function selectTable(tableNum) {
-    selectedTable = tableNum;
-    const items = inventory.filter(i => i.table === tableNum);
-    
-    document.querySelectorAll('.zone').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.zone').forEach(el => {
-        if (parseInt(el.dataset.table) === tableNum) el.classList.add('active');
-    });
-    
-    document.querySelectorAll('.table-badge').forEach(el => {
-        el.classList.toggle('active-badge', parseInt(el.textContent) === tableNum);
-    });
-    
-    if (items.length > 0) {
-        // QR-код ведёт на эту же страницу с параметром
-        const qrData = window.location.href.split('?')[0] + '?table=' + tableNum;
-        document.getElementById('qr-output').innerHTML = '';
-        qrInstance = new QRCode(document.getElementById('qr-output'), {
-            text: qrData,
-            width: 150,
-            height: 150,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        document.getElementById('print-btn').style.display = 'inline-block';
-        document.getElementById('print-all-btn').style.display = 'inline-block';
-    } else {
-        document.getElementById('qr-output').innerHTML = `<p style="color:#999;">Стол №${tableNum} — нет оборудования</p>`;
-        document.getElementById('print-btn').style.display = 'none';
-    }
-    
-    renderDeviceList(items);
-}
-
-// ============================================================
-// 8. ОСТАЛЬНЫЕ ФУНКЦИИ (поиск, сканер, печать)
-// ============================================================
-function renderDeviceList(items) {
-    const container = document.getElementById('device-list');
-    if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#999;">Выберите стол на карте или введите поиск</p>';
-        return;
-    }
-    container.innerHTML = items.map(item => `
-        <div class="device-card">
-            <b>${item.id}</b> — ${item.type} (SN: ${item.sn})<br>
-            <small>Ответственный: ${item.person} | Стол №${item.table}</small>
-        </div>
-    `).join('');
-}
-
-function searchDevice() {
-    const query = document.getElementById('search-input').value.toLowerCase().trim();
-    if (!query) { renderDeviceList([]); return; }
-    const found = inventory.filter(i => 
-        i.id.toLowerCase().includes(query) || 
-        i.table.toString().includes(query) ||
-        i.person.toLowerCase().includes(query) ||
-        i.type.toLowerCase().includes(query)
-    );
-    if (found.length === 0) {
-        document.getElementById('device-list').innerHTML = '<p style="color:red;">❌ Ничего не найдено</p>';
-        return;
-    }
-    renderDeviceList(found);
-    if (found.length > 0) {
-        selectTable(found[0].table);
-    }
-}
-
-function updateStats() {
-    const uniqueTables = [...new Set(inventory.map(i => i.table))];
-    document.getElementById('stats').innerHTML = `
-        <span>📦 Всего: ${inventory.length}</span>
-        <span>🪑 Столов: ${uniqueTables.length}</span>
-        <span>📊 Среднее: ${(inventory.length / (uniqueTables.length || 1)).toFixed(1)} шт/стол</span>
-    `;
-}
-
-// Сканер
-document.getElementById('start-scan').addEventListener('click', function() {
-    this.style.display = 'none';
-    document.getElementById('stop-scan').style.display = 'inline-block';
-    
-    html5QrCode = new Html5Qrcode("scanner-box");
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 180 } },
-        (decodedText) => {
-            const match = decodedText.match(/[?&]table=(\d+)/);
-            if (match) {
-                const tableNum = parseInt(match[1]);
-                const hasItems = inventory.some(i => i.table === tableNum);
-                if (hasItems) {
-                    document.getElementById('scanner-result').innerHTML = `✅ Стол №${tableNum} найден`;
-                    selectTable(tableNum);
-                } else {
-                    document.getElementById('scanner-result').innerHTML = `⚠️ Стол №${tableNum} пуст`;
-                }
-            } else {
-                document.getElementById('scanner-result').innerHTML = `⚠️ Неверный QR-код`;
-            }
-            stopScanner();
-        },
-        (error) => {}
-    );
-});
-
-document.getElementById('stop-scan').addEventListener('click', stopScanner);
-
-function stopScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-            document.getElementById('start-scan').style.display = 'inline-block';
-            document.getElementById('stop-scan').style.display = 'none';
-            document.getElementById('scanner-result').innerHTML = '';
-        });
-    }
-}
-
-// Печать
-function printQR() {
-    const qrCanvas = document.querySelector('#qr-output canvas');
-    if (!qrCanvas) { alert('Сначала выберите стол'); return; }
-    const win = window.open('', '_blank');
-    win.document.write(`
-        <html><head><title>Этикетка Стол ${selectedTable}</title>
-        <style>body { text-align: center; padding: 20px; font-family: Arial; } img { max-width: 200px; }</style>
-        </head><body>
-        <h3>Стол №${selectedTable}</h3>
-        <img src="${qrCanvas.toDataURL()}" />
-        <p style="font-size: 11px;">${inventory.filter(i => i.table === selectedTable).map(i => i.id).join('<br>')}</p>
-        <script>window.onload=function(){window.print();setTimeout(()=>window.close(),1000)}<\/script>
-        </body></html>
-    `);
-}
-
-function printAllQR() {
-    const tables = [...new Set(inventory.map(i => i.table))].sort((a,b) => a-b);
-    if (tables.length === 0) return alert('Нет данных');
-    let html = `<html><head><title>Все QR-коды</title>
-        <style>body { font-family: Arial; padding: 10px; } .page { page-break-after: always; text-align: center; padding: 20px; } img { max-width: 150px; }</style>
-        </head><body>`;
-    tables.forEach(t => {
-        const tempDiv = document.createElement('div');
-        new QRCode(tempDiv, { text: window.location.href.split('?')[0] + '?table=' + t, width: 150, height: 150 });
-        const canvas = tempDiv.querySelector('canvas');
-        html += `<div class="page"><h3>Стол №${t}</h3><img src="${canvas.toDataURL()}" /><p>${inventory.filter(i=>i.table===t).map(i=>i.id).join('<br>')}</p></div>`;
-    });
-    html += `<script>window.onload=function(){window.print();setTimeout(()=>window.close(),1000)}<\/script></body></html>`;
-    const win = window.open('', '_blank');
-    win.document.write(html);
+function createZone(num, x, y) {
+    var map = document.getElementById('map');
+    var div = document.createElement('div');
+    div.className = 'zone';
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.style.width = '40px';
+    div.style.height = '40px';
+    div.innerHTML = '<span class="zone-label">№' + num + '</span>';
+    div.onclick = function() { alert('Стол №' + num); logMsg('📍 Стол №' + num); };
+    map.appendChild(div);
 }
 
 function clearAll() {
-    if (confirm('Удалить все зоны и данные?')) {
-        zones = [];
-        inventory = [];
-        localStorage.removeItem('zones_136');
-        document.getElementById('zones-container').innerHTML = '';
-        renderDeviceList([]);
-        renderTableGrid();
-        updateStats();
-        document.getElementById('qr-output').innerHTML = 'Выберите стол';
-        document.getElementById('print-btn').style.display = 'none';
-        document.getElementById('print-all-btn').style.display = 'none';
-    }
+    if (!confirm('Удалить всё?')) return;
+    tables = [];
+    tableCounter = 0;
+    document.getElementById('map').innerHTML = '<div style="padding:20px;text-align:center;color:#999;">Загрузите картинку</div>';
+    logMsg('🗑️ Всё очищено');
 }
 
-// ============================================================
-// 9. АВТОЗАПУСК
-// ============================================================
-// Генерируем тестовые данные (136 столов)
-function generateTestData() {
-    const types = ['Монитор', 'Системник', 'Ноутбук', 'Принтер', 'Телефон', 'Планшет'];
-    const names = ['Иванов', 'Петров', 'Сидоров', 'Козлов', 'Смирнов', 'Волков', 'Морозов', 'Новиков'];
-    const data = [];
-    for (let t = 1; t <= 136; t++) {
-        const count = 2 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < count; i++) {
-            const type = types[Math.floor(Math.random() * types.length)];
-            const id = `IT-${type.substring(0,3).toUpperCase()}-2026-${String(t).padStart(3,'0')}${String(i+1).padStart(2,'0')}`;
-            data.push({
-                id: id,
-                type: type,
-                sn: `SN${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-                person: names[Math.floor(Math.random() * names.length)],
-                table: t
-            });
-        }
-    }
-    return data;
-}
-
-inventory = generateTestData();
-renderDeviceList([]);
-renderTableGrid();
-updateStats();
-
-// Загружаем демо-картинку
-document.getElementById('floor-plan').src = 'https://via.placeholder.com/1200x800/CCCCCC/000000?text=Ваш+план+на+136+столов';
-document.getElementById('floor-plan').onload = () => {
-    if (zones.length === 0) autoGenerateZones();
-    renderZones();
-};
-
-// Обработка параметра ?table=XXX из QR-кода
-window.onload = function() {
-    const params = new URLSearchParams(window.location.search);
-    const table = params.get('table');
-    if (table) {
-        setTimeout(() => selectTable(parseInt(table)), 500);
-    }
-};
-
-document.getElementById('search-input').addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') searchDevice();
-});
+logMsg('✅ Готово! Загрузите картинку или добавьте стол.');
 </script>
 </body>
 </html>
